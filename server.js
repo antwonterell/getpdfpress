@@ -332,6 +332,7 @@ app.post("/api/merge", upload.array("files", 20), async (req, res) => {
 // ============================================
 app.post("/api/split", upload.single("file"), async (req, res) => {
   let inputPath, outputPaths = [];
+  const archiver = require('archiver');
 
   try {
     if (!req.file) {
@@ -353,8 +354,6 @@ app.post("/api/split", upload.single("file"), async (req, res) => {
 
     console.log(`📄 Splitting ${pageCount} pages...`);
 
-    const pages = [];
-
     // Create individual PDF files for each page
     for (let i = 0; i < pageCount; i++) {
       const singlePagePdf = await PDFDocument.create();
@@ -366,82 +365,11 @@ app.post("/api/split", upload.single("file"), async (req, res) => {
       
       await fs.writeFile(outputPath, singlePageBytes);
       outputPaths.push(outputPath);
-      
-      // Add page data for preview
-      pages.push({
-        pageNumber: i + 1,
-        filename: `page-${i + 1}.pdf`,
-        data: singlePageBytes.toString('base64'),
-        size: singlePageBytes.length,
-        thumbnail: null, // Could add thumbnail generation later
-      });
     }
 
     console.log(`✅ Created ${pageCount} PDF files`);
 
-    // Return JSON with page data for preview
-    res.json({
-      success: true,
-      pageCount,
-      pages,
-      message: `Split ${pageCount} page(s) successfully`,
-    });
-
-  } catch (error) {
-    console.error("❌ Split error:", error.message);
-    if (!res.headersSent) {
-      res.status(500).json({
-        error: "Split failed",
-        details: error.message,
-      });
-    }
-  } finally {
-    // Keep files for 5 minutes for download links
-    setTimeout(async () => {
-      await cleanupFiles(inputPath, ...outputPaths);
-    }, 5 * 60 * 1000);
-  }
-});
-
-// NEW ENDPOINT: Download all split pages as ZIP
-app.post("/api/split-zip", upload.single("file"), async (req, res) => {
-  let inputPath, outputPaths = [];
-  const archiver = require('archiver');
-
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    inputPath = req.file.path;
-    const pdfBytes = await fs.readFile(inputPath);
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-    
-    const pageCount = pdfDoc.getPageCount();
-    
-    if (pageCount === 1) {
-      return res.status(400).json({
-        error: "Cannot split",
-        message: "PDF has only 1 page",
-      });
-    }
-
-    console.log(`📦 Creating ZIP with ${pageCount} split pages...`);
-
-    // Create individual PDF files for each page
-    for (let i = 0; i < pageCount; i++) {
-      const singlePagePdf = await PDFDocument.create();
-      const [copiedPage] = await singlePagePdf.copyPages(pdfDoc, [i]);
-      singlePagePdf.addPage(copiedPage);
-      
-      const singlePageBytes = await singlePagePdf.save({ useObjectStreams: true });
-      const outputPath = path.join(outputDir, `page-${i + 1}-${Date.now()}.pdf`);
-      
-      await fs.writeFile(outputPath, singlePageBytes);
-      outputPaths.push(outputPath);
-    }
-
-    // Create ZIP archive
+    // Create ZIP archive (direct download)
     const archive = archiver('zip', { zlib: { level: 9 } });
     
     res.set({
@@ -457,10 +385,10 @@ app.post("/api/split-zip", upload.single("file"), async (req, res) => {
     }
 
     await archive.finalize();
-    console.log(`✅ ZIP download complete: ${pageCount} pages`);
+    console.log(`✅ Split complete: ${pageCount} pages in ZIP`);
 
   } catch (error) {
-    console.error("❌ Split ZIP error:", error.message);
+    console.error("❌ Split error:", error.message);
     if (!res.headersSent) {
       res.status(500).json({
         error: "Split failed",
