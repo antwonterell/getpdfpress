@@ -1031,6 +1031,17 @@
               processing will be added next.
             </p>
           </div>
+
+          <!-- File list for multi-file uploads (merge, jpg-to-pdf) - MOVED HERE -->
+          <div id="fileList" class="hidden mt-4 space-y-2">
+            <div class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Selected files:
+            </div>
+            <div id="fileListItems" class="space-y-2 max-h-64 overflow-y-auto">
+              <!-- File items will be inserted here -->
+            </div>
+          </div>
+
           <button
             id="compressBtn"
             disabled
@@ -1046,16 +1057,6 @@
             >
               Choose a file to begin
             </p>
-
-            <!-- File list for multi-file uploads (merge, jpg-to-pdf) -->
-            <div id="fileList" class="hidden mt-4 space-y-2">
-              <div class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Selected files:
-              </div>
-              <div id="fileListItems" class="space-y-2 max-h-64 overflow-y-auto">
-                <!-- File items will be inserted here -->
-              </div>
-            </div>
 
             <!-- Progress bar (hidden by default) -->
             <div id="progressContainer" class="hidden">
@@ -2885,11 +2886,27 @@
             // Check if tool supports multiple files
             if (
               (currentToolKey === "merge-pdf" ||
-                currentToolKey === "jpg-to-pdf") &&
-              fileInputEl.files.length > 1
+                currentToolKey === "jpg-to-pdf")
             ) {
-              handleMultipleFiles(Array.from(fileInputEl.files));
+              // For multi-file tools, ADD new files to existing selection
+              const newFiles = Array.from(fileInputEl.files);
+              
+              if (fileInputEl.files.length > 1) {
+                // Multiple files selected at once
+                handleMultipleFiles(newFiles);
+              } else if (fileInputEl.files.length === 1) {
+                // Single file selected - add to existing files
+                if (selectedFiles.length > 0) {
+                  // Add to existing files
+                  const combinedFiles = [...selectedFiles, ...newFiles];
+                  handleMultipleFiles(combinedFiles);
+                } else {
+                  // First file
+                  handleMultipleFiles(newFiles);
+                }
+              }
             } else {
+              // Single file tools - replace as before
               handleFile(fileInputEl.files[0]);
             }
           });
@@ -2907,11 +2924,27 @@
             // Check if tool supports multiple files
             if (
               (currentToolKey === "merge-pdf" ||
-                currentToolKey === "jpg-to-pdf") &&
-              e.dataTransfer.files.length > 1
+                currentToolKey === "jpg-to-pdf")
             ) {
-              handleMultipleFiles(Array.from(e.dataTransfer.files));
+              // For multi-file tools, ADD new files to existing selection
+              const newFiles = Array.from(e.dataTransfer.files);
+              
+              if (e.dataTransfer.files.length > 1) {
+                // Multiple files dropped at once
+                handleMultipleFiles(newFiles);
+              } else if (e.dataTransfer.files.length === 1) {
+                // Single file dropped - add to existing files
+                if (selectedFiles.length > 0) {
+                  // Add to existing files
+                  const combinedFiles = [...selectedFiles, ...newFiles];
+                  handleMultipleFiles(combinedFiles);
+                } else {
+                  // First file
+                  handleMultipleFiles(newFiles);
+                }
+              }
             } else {
+              // Single file tools - replace as before
               handleFile(e.dataTransfer.files[0]);
             }
           });
