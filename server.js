@@ -414,7 +414,7 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
 
     inputPath = req.file.path;
 
-    // First, get the page count
+    // Get page count
     const pdfBytes = await fs.readFile(inputPath);
     const { PDFDocument } = require("pdf-lib");
     const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -422,13 +422,13 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
 
     console.log(`📄 Converting ${pageCount} page(s) to images...`);
 
+    // FIXED: Remove width/height to preserve aspect ratio
     const converter = fromPath(inputPath, {
-      density: 150,
+      density: 200,  // Higher DPI for better quality
       saveFilename: `page-${Date.now()}`,
       savePath: outputDir,
       format: "png",
-      width: 1200,
-      height: 1800,
+      // No width/height = preserves original PDF page dimensions
     });
 
     // Convert all pages
@@ -443,22 +443,137 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
       console.log(`✅ Converted page ${i}/${pageCount}`);
     }
 
-    // If only one page, return the single image
-    if (pageCount === 1) {
-      const imageBytes = await fs.readFile(outputPaths[0]);
+    // Return JSON with image data for frontend display
+    const images = [];
+    for (let i = 0; i < outputPaths.length; i++) {
+      const imageBytes = await fs.readFile(outputPaths[i]);
+      const base64 = imageBytes.toString('base64');
       
-      res.set({
-        "Content-Type": "image/png",
-        "Content-Disposition": `attachment; filename="page-1.png"`,
-        "Content-Length": imageBytes.length,
+      images.push({
+        pageNumber: i + 1,
+        filename: `page-${i + 1}.png`,
+        data: `data:image/png;base64,${base64}`,
+        size: imageBytes.length,
       });
-      
-      return res.send(imageBytes);
     }
 
-    // Multiple pages - create ZIP
-    console.log(`📦 Creating ZIP with ${pageCount} images...`);
+    // Return JSON response with all images
+    res.json({
+      success: true,
+      pageCount,
+      images,
+      message: `Converted ${pageCount} page(s) to images`,
+    });
+
+    console.log(`✅ PDF to Images complete: ${pageCount} images generated`);
+
+  } catch (error) {
+    console.error("❌ PDF to Images error:", error.message);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Conversion failed",
+        details: error.message,
+      });
+    }
+  } finally {
+    // Keep files for 5 minutes for download links
+    setTimeout(async () => {
+      await cleanupFiles(inputPath, ...outputPaths);
+    }, 5 * 60 * 1000);
+  }
+});
+
+// NEW ENDPOINT: Download single image by page number
+app.post("/api/pdf-to-images-download", upload.single("file"), async (req, res) => {
+  let inputPath, outputPath;
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const pageNumber = parseInt(req.body.pageNumber) || 1;
+    inputPath = req.file.path;
+
+    console.log(`📄 Converting page ${pageNumber} to image...`);
+
+    const converter = fromPath(inputPath, {
+      density: 200,
+      saveFilename: `page-${Date.now()}`,
+      savePath: outputDir,
+      format: "png",
+    });
+
+    const result = await converter(pageNumber, { responseType: "image" });
     
+    if (!result || !result.path) {
+      throw new Error(`Failed to convert page ${pageNumber}`);
+    }
+    
+    outputPath = result.path;
+    const imageBytes = await fs.readFile(outputPath);
+    
+    res.set({
+      "Content-Type": "image/png",
+      "Content-Disposition": `attachment; filename="page-${pageNumber}.png"`,
+      "Content-Length": imageBytes.length,
+    });
+    
+    res.send(imageBytes);
+    console.log(`✅ Downloaded page ${pageNumber} as image`);
+
+  } catch (error) {
+    console.error("❌ PDF to single image error:", error.message);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Conversion failed",
+        details: error.message,
+      });
+    }
+  } finally {
+    await cleanupFiles(inputPath, outputPath);
+  }
+});
+
+// NEW ENDPOINT: Download all images as ZIP
+app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
+  let inputPath, outputPaths = [];
+  const archiver = require('archiver');
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    inputPath = req.file.path;
+
+    // Get page count
+    const pdfBytes = await fs.readFile(inputPath);
+    const { PDFDocument } = require("pdf-lib");
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pageCount = pdfDoc.getPageCount();
+
+    console.log(`📦 Creating ZIP with ${pageCount} images...`);
+
+    const converter = fromPath(inputPath, {
+      density: 200,
+      saveFilename: `page-${Date.now()}`,
+      savePath: outputDir,
+      format: "png",
+    });
+
+    // Convert all pages
+    for (let i = 1; i <= pageCount; i++) {
+      const result = await converter(i, { responseType: "image" });
+      
+      if (!result || !result.path) {
+        throw new Error(`Failed to convert page ${i}`);
+      }
+      
+      outputPaths.push(result.path);
+    }
+
+    // Create ZIP
     const archive = archiver('zip', { zlib: { level: 9 } });
     
     res.set({
@@ -468,16 +583,16 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
 
     archive.pipe(res);
 
-    // Add all images to the archive
+    // Add all images to archive
     for (let i = 0; i < outputPaths.length; i++) {
       archive.file(outputPaths[i], { name: `page-${i + 1}.png` });
     }
 
     await archive.finalize();
-    console.log(`✅ PDF to Images complete: ${pageCount} images in ZIP`);
+    console.log(`✅ ZIP download complete: ${pageCount} images`);
 
   } catch (error) {
-    console.error("❌ PDF to Images error:", error.message);
+    console.error("❌ PDF to ZIP error:", error.message);
     if (!res.headersSent) {
       res.status(500).json({
         error: "Conversion failed",
