@@ -328,10 +328,11 @@ app.post("/api/merge", upload.array("files", 20), async (req, res) => {
 });
 
 // ============================================
-// SPLIT PDF - Native pdf-lib
+// SPLIT PDF - Native pdf-lib + archiver
 // ============================================
 app.post("/api/split", upload.single("file"), async (req, res) => {
   let inputPath, outputPaths = [];
+  const archiver = require('archiver');
 
   try {
     if (!req.file) {
@@ -351,30 +352,49 @@ app.post("/api/split", upload.single("file"), async (req, res) => {
       });
     }
 
-    // Create ZIP would require additional library
-    // For now, return first page and info
-    const firstPagePdf = await PDFDocument.create();
-    const [copiedPage] = await firstPagePdf.copyPages(pdfDoc, [0]);
-    firstPagePdf.addPage(copiedPage);
+    console.log(`📄 Splitting ${pageCount} pages...`);
+
+    // Create individual PDF files for each page
+    for (let i = 0; i < pageCount; i++) {
+      const singlePagePdf = await PDFDocument.create();
+      const [copiedPage] = await singlePagePdf.copyPages(pdfDoc, [i]);
+      singlePagePdf.addPage(copiedPage);
+      
+      const singlePageBytes = await singlePagePdf.save({ useObjectStreams: true });
+      const outputPath = path.join(outputDir, `page-${i + 1}-${Date.now()}.pdf`);
+      
+      await fs.writeFile(outputPath, singlePageBytes);
+      outputPaths.push(outputPath);
+    }
+
+    console.log(`✅ Created ${pageCount} PDF files`);
+
+    // Create ZIP archive
+    const archive = archiver('zip', { zlib: { level: 9 } });
     
-    const firstPageBytes = await firstPagePdf.save({ useObjectStreams: true });
-
-    console.log(`✅ Split PDF - returning page 1 of ${pageCount}`);
-
     res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="page-1.pdf"`,
-      "X-Total-Pages": pageCount,
-      "X-Page-Number": 1,
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="split-pages.zip"`,
     });
 
-    res.send(Buffer.from(firstPageBytes));
+    archive.pipe(res);
+
+    // Add all PDFs to the archive
+    for (let i = 0; i < outputPaths.length; i++) {
+      archive.file(outputPaths[i], { name: `page-${i + 1}.pdf` });
+    }
+
+    await archive.finalize();
+    console.log(`✅ Split complete: ${pageCount} pages in ZIP`);
+
   } catch (error) {
     console.error("❌ Split error:", error.message);
-    res.status(500).json({
-      error: "Split failed",
-      details: error.message,
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Split failed",
+        details: error.message,
+      });
+    }
   } finally {
     await cleanupFiles(inputPath, ...outputPaths);
   }
@@ -385,6 +405,7 @@ app.post("/api/split", upload.single("file"), async (req, res) => {
 // ============================================
 app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
   let inputPath, outputPaths = [];
+  const archiver = require('archiver');
 
   try {
     if (!req.file) {
@@ -392,6 +413,14 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
     }
 
     inputPath = req.file.path;
+
+    // First, get the page count
+    const pdfBytes = await fs.readFile(inputPath);
+    const { PDFDocument } = require("pdf-lib");
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pageCount = pdfDoc.getPageCount();
+
+    console.log(`📄 Converting ${pageCount} page(s) to images...`);
 
     const converter = fromPath(inputPath, {
       density: 150,
@@ -402,30 +431,59 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
       height: 1800,
     });
 
-    const result = await converter(1, { responseType: "image" });
-
-    if (!result || !result.path) {
-      throw new Error("Conversion failed");
+    // Convert all pages
+    for (let i = 1; i <= pageCount; i++) {
+      const result = await converter(i, { responseType: "image" });
+      
+      if (!result || !result.path) {
+        throw new Error(`Failed to convert page ${i}`);
+      }
+      
+      outputPaths.push(result.path);
+      console.log(`✅ Converted page ${i}/${pageCount}`);
     }
 
-    outputPaths.push(result.path);
-    const imageBytes = await fs.readFile(result.path);
+    // If only one page, return the single image
+    if (pageCount === 1) {
+      const imageBytes = await fs.readFile(outputPaths[0]);
+      
+      res.set({
+        "Content-Type": "image/png",
+        "Content-Disposition": `attachment; filename="page-1.png"`,
+        "Content-Length": imageBytes.length,
+      });
+      
+      return res.send(imageBytes);
+    }
 
-    console.log(`✅ PDF → Image: ${result.path}`);
-
+    // Multiple pages - create ZIP
+    console.log(`📦 Creating ZIP with ${pageCount} images...`);
+    
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    
     res.set({
-      "Content-Type": "image/png",
-      "Content-Disposition": `attachment; filename="page-1.png"`,
-      "Content-Length": imageBytes.length,
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="pdf-pages.zip"`,
     });
 
-    res.send(imageBytes);
+    archive.pipe(res);
+
+    // Add all images to the archive
+    for (let i = 0; i < outputPaths.length; i++) {
+      archive.file(outputPaths[i], { name: `page-${i + 1}.png` });
+    }
+
+    await archive.finalize();
+    console.log(`✅ PDF to Images complete: ${pageCount} images in ZIP`);
+
   } catch (error) {
     console.error("❌ PDF to Images error:", error.message);
-    res.status(500).json({
-      error: "Conversion failed",
-      details: error.message,
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Conversion failed",
+        details: error.message,
+      });
+    }
   } finally {
     await cleanupFiles(inputPath, ...outputPaths);
   }
