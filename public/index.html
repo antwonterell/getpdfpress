@@ -2315,7 +2315,6 @@
       async function splitPDF(file) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("pages", "all");
 
         const response = await fetch(`${API_BASE}/split`, {
           method: "POST",
@@ -2324,10 +2323,15 @@
 
         if (!response.ok) throw new Error("Split failed");
 
-        const data = await response.json();
+        // Server returns first page as PDF blob
+        const blob = await response.blob();
+        const totalPages = response.headers.get('X-Total-Pages') || '1';
+        
         return {
-          type: "multiple",
-          files: data.files,
+          type: "download",
+          blob: blob,
+          filename: `page-1.pdf`,
+          message: `Extracted page 1 of ${totalPages}`
         };
       }
 
@@ -2335,7 +2339,7 @@
         const formData = new FormData();
         files.forEach((file) => formData.append("files", file));
 
-        const response = await fetch(`${API_BASE}/jpg-to-pdf`, {
+        const response = await fetch(`${API_BASE}/images-to-pdf`, {
           method: "POST",
           body: formData,
         });
@@ -2346,7 +2350,7 @@
         return {
           type: "download",
           blob: blob,
-          filename: "converted.pdf",
+          filename: "images.pdf",
         };
       }
 
@@ -2354,17 +2358,19 @@
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(`${API_BASE}/pdf-to-jpg`, {
+        const response = await fetch(`${API_BASE}/pdf-to-images`, {
           method: "POST",
           body: formData,
         });
 
         if (!response.ok) throw new Error("Conversion failed");
 
-        const data = await response.json();
+        // Server returns first page as PNG blob
+        const blob = await response.blob();
         return {
-          type: "images",
-          images: data.images,
+          type: "download",
+          blob: blob,
+          filename: "page-1.png",
         };
       }
 
