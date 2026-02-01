@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: getpdfpress
+    runtime: docker
+    plan: starter  # $7/month - no sleeping, faster, more reliable
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CONVERTAPI_SECRET
+        sync: false  # Set this manually in Render dashboard
