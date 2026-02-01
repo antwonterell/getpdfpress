@@ -509,6 +509,8 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
     const fileBuffer = await fs.readFile(inputPath);
     const base64File = fileBuffer.toString('base64');
 
+    console.log(`📤 Calling ConvertAPI for Word → PDF (${req.file.originalname})`);
+
     // Call ConvertAPI
     const response = await axios.post(
       `https://v2.convertapi.com/convert/docx/to/pdf?Secret=${CONVERTAPI_SECRET}`,
@@ -529,11 +531,27 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
       }
     );
 
+    // Log the full response for debugging
+    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+
     if (response.data && response.data.Files && response.data.Files[0]) {
-      const pdfUrl = response.data.Files[0].Url;
+      const fileInfo = response.data.Files[0];
+      const pdfUrl = fileInfo.Url;
+      
+      // Validate URL before downloading
+      console.log('📥 Download URL:', pdfUrl);
+      console.log('📄 File info:', JSON.stringify(fileInfo, null, 2));
+      
+      if (!pdfUrl || typeof pdfUrl !== 'string' || !pdfUrl.startsWith('http')) {
+        throw new Error(`Invalid download URL from ConvertAPI: ${JSON.stringify(fileInfo)}`);
+      }
       
       // Download the converted PDF
-      const pdfResponse = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
+      console.log('⬇️ Downloading converted file...');
+      const pdfResponse = await axios.get(pdfUrl, { 
+        responseType: 'arraybuffer',
+        timeout: 60000
+      });
       const pdfBytes = Buffer.from(pdfResponse.data);
 
       console.log(`✅ Word → PDF via ConvertAPI: ${Math.round(pdfBytes.length / 1024)}KB`);
@@ -546,10 +564,12 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
 
       res.send(pdfBytes);
     } else {
+      console.error('❌ Invalid ConvertAPI response structure:', response.data);
       throw new Error("ConvertAPI returned invalid response");
     }
   } catch (error) {
     console.error("❌ Word to PDF error:", error.message);
+    console.error("❌ Error details:", error.response?.data || error);
     res.status(500).json({
       error: "Conversion failed",
       details: error.response?.data?.Message || error.message,
@@ -582,6 +602,8 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
     const fileBuffer = await fs.readFile(inputPath);
     const base64File = fileBuffer.toString('base64');
 
+    console.log(`📤 Calling ConvertAPI for PDF → Word (${req.file.originalname})`);
+
     const response = await axios.post(
       `https://v2.convertapi.com/convert/pdf/to/docx?Secret=${CONVERTAPI_SECRET}`,
       {
@@ -601,10 +623,26 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
       }
     );
 
+    // Log the full response for debugging
+    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+
     if (response.data && response.data.Files && response.data.Files[0]) {
-      const docxUrl = response.data.Files[0].Url;
+      const fileInfo = response.data.Files[0];
+      const docxUrl = fileInfo.Url;
       
-      const docxResponse = await axios.get(docxUrl, { responseType: 'arraybuffer' });
+      // Validate URL before downloading
+      console.log('📥 Download URL:', docxUrl);
+      console.log('📄 File info:', JSON.stringify(fileInfo, null, 2));
+      
+      if (!docxUrl || typeof docxUrl !== 'string' || !docxUrl.startsWith('http')) {
+        throw new Error(`Invalid download URL from ConvertAPI: ${JSON.stringify(fileInfo)}`);
+      }
+      
+      console.log('⬇️ Downloading converted file...');
+      const docxResponse = await axios.get(docxUrl, { 
+        responseType: 'arraybuffer',
+        timeout: 60000
+      });
       const docxBytes = Buffer.from(docxResponse.data);
 
       console.log(`✅ PDF → Word via ConvertAPI: ${Math.round(docxBytes.length / 1024)}KB`);
@@ -617,10 +655,12 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
 
       res.send(docxBytes);
     } else {
+      console.error('❌ Invalid ConvertAPI response structure:', response.data);
       throw new Error("ConvertAPI returned invalid response");
     }
   } catch (error) {
     console.error("❌ PDF to Word error:", error.message);
+    console.error("❌ Error details:", error.response?.data || error);
     res.status(500).json({
       error: "Conversion failed",
       details: error.response?.data?.Message || error.message,
