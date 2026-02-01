@@ -536,23 +536,26 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];
-      const pdfUrl = fileInfo.Url;
       
-      // Validate URL before downloading
-      console.log('📥 Download URL:', pdfUrl);
-      console.log('📄 File info:', JSON.stringify(fileInfo, null, 2));
+      // ConvertAPI returns FileData (base64) instead of Url
+      let pdfBytes;
       
-      if (!pdfUrl || typeof pdfUrl !== 'string' || !pdfUrl.startsWith('http')) {
-        throw new Error(`Invalid download URL from ConvertAPI: ${JSON.stringify(fileInfo)}`);
+      if (fileInfo.FileData) {
+        // Decode base64 data directly
+        console.log('📦 Decoding FileData (base64)...');
+        pdfBytes = Buffer.from(fileInfo.FileData, 'base64');
+      } else if (fileInfo.Url) {
+        // Fallback to URL download if available
+        console.log('📥 Download URL:', fileInfo.Url);
+        console.log('⬇️ Downloading converted file...');
+        const pdfResponse = await axios.get(fileInfo.Url, { 
+          responseType: 'arraybuffer',
+          timeout: 60000
+        });
+        pdfBytes = Buffer.from(pdfResponse.data);
+      } else {
+        throw new Error(`No FileData or Url in ConvertAPI response: ${JSON.stringify(fileInfo)}`);
       }
-      
-      // Download the converted PDF
-      console.log('⬇️ Downloading converted file...');
-      const pdfResponse = await axios.get(pdfUrl, { 
-        responseType: 'arraybuffer',
-        timeout: 60000
-      });
-      const pdfBytes = Buffer.from(pdfResponse.data);
 
       console.log(`✅ Word → PDF via ConvertAPI: ${Math.round(pdfBytes.length / 1024)}KB`);
 
@@ -628,22 +631,26 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];
-      const docxUrl = fileInfo.Url;
       
-      // Validate URL before downloading
-      console.log('📥 Download URL:', docxUrl);
-      console.log('📄 File info:', JSON.stringify(fileInfo, null, 2));
+      // ConvertAPI returns FileData (base64) instead of Url
+      let docxBytes;
       
-      if (!docxUrl || typeof docxUrl !== 'string' || !docxUrl.startsWith('http')) {
-        throw new Error(`Invalid download URL from ConvertAPI: ${JSON.stringify(fileInfo)}`);
+      if (fileInfo.FileData) {
+        // Decode base64 data directly
+        console.log('📦 Decoding FileData (base64)...');
+        docxBytes = Buffer.from(fileInfo.FileData, 'base64');
+      } else if (fileInfo.Url) {
+        // Fallback to URL download if available
+        console.log('📥 Download URL:', fileInfo.Url);
+        console.log('⬇️ Downloading converted file...');
+        const docxResponse = await axios.get(fileInfo.Url, { 
+          responseType: 'arraybuffer',
+          timeout: 60000
+        });
+        docxBytes = Buffer.from(docxResponse.data);
+      } else {
+        throw new Error(`No FileData or Url in ConvertAPI response: ${JSON.stringify(fileInfo)}`);
       }
-      
-      console.log('⬇️ Downloading converted file...');
-      const docxResponse = await axios.get(docxUrl, { 
-        responseType: 'arraybuffer',
-        timeout: 60000
-      });
-      const docxBytes = Buffer.from(docxResponse.data);
 
       console.log(`✅ PDF → Word via ConvertAPI: ${Math.round(docxBytes.length / 1024)}KB`);
 
