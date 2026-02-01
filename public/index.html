@@ -1960,9 +1960,12 @@
         if (stickyProcessBtnEl) stickyProcessBtnEl.disabled = true;
         if (resultsEl) resultsEl.classList.add("hidden");
         
-        // Clear PDF to JPG preview container when switching tools
+        // Clear PDF to JPG preview container when switching tools (aggressive hiding)
         const pdfToJpgContainer = document.getElementById('pdfToJpgPreviewContainer');
-        if (pdfToJpgContainer) pdfToJpgContainer.classList.add('hidden');
+        if (pdfToJpgContainer) {
+          pdfToJpgContainer.classList.add('hidden');
+          pdfToJpgContainer.style.display = 'none';
+        }
         
         if (statusEl) statusEl.textContent = "Choose a file to begin";
         if (stickyFileNameEl) stickyFileNameEl.textContent = "No file selected";
@@ -2326,7 +2329,15 @@
           body: formData,
         });
 
-        if (!response.ok) throw new Error("Split failed");
+        if (!response.ok) {
+          // Try to get error message from JSON
+          try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorData.message || "Split failed");
+          } catch (e) {
+            throw new Error("Split failed");
+          }
+        }
 
         // Server returns ZIP file with all pages (direct download)
         const blob = await response.blob();
@@ -2792,9 +2803,12 @@
         if (stickyProcessBtnEl) stickyProcessBtnEl.disabled = true;
         if (resultsEl) resultsEl.classList.add("hidden");
         
-        // Hide PDF to JPG preview container
+        // Hide PDF to JPG preview container (aggressive hiding)
         const pdfToJpgContainer = document.getElementById('pdfToJpgPreviewContainer');
-        if (pdfToJpgContainer) pdfToJpgContainer.classList.add('hidden');
+        if (pdfToJpgContainer) {
+          pdfToJpgContainer.classList.add('hidden');
+          pdfToJpgContainer.style.display = 'none';
+        }
         
         if (statusEl) statusEl.textContent = "Choose a file to begin";
         if (stickyFileNameEl) stickyFileNameEl.textContent = "No file selected";
@@ -3036,6 +3050,7 @@
         
         // Show container
         previewContainer.classList.remove('hidden');
+        previewContainer.style.display = ''; // Remove any inline display style
         
         // Wire up buttons
         document.getElementById('downloadAllJpgZip').onclick = () => downloadAllAsZip(originalFile, 'pdf-to-images-zip', 'pdf-pages.zip');
