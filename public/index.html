@@ -2323,15 +2323,13 @@
 
         if (!response.ok) throw new Error("Split failed");
 
-        // Server returns first page as PDF blob
+        // Server returns ZIP file with all pages
         const blob = await response.blob();
-        const totalPages = response.headers.get('X-Total-Pages') || '1';
         
         return {
           type: "download",
           blob: blob,
-          filename: `page-1.pdf`,
-          message: `Extracted page 1 of ${totalPages}`
+          filename: `split-pages.zip`
         };
       }
 
@@ -2365,12 +2363,20 @@
 
         if (!response.ok) throw new Error("Conversion failed");
 
-        // Server returns first page as PNG blob
+        // Server returns ZIP file with all pages (or single PNG if 1 page)
         const blob = await response.blob();
+        const contentType = response.headers.get('Content-Type');
+        
+        // If single page PDF, server returns PNG
+        // If multi-page PDF, server returns ZIP
+        const filename = contentType === 'application/zip' 
+          ? 'pdf-pages.zip' 
+          : 'page-1.png';
+        
         return {
           type: "download",
           blob: blob,
-          filename: "page-1.png",
+          filename: filename,
         };
       }
 
