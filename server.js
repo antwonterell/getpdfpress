@@ -423,11 +423,20 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
       // Would need to implement page selection here
     }
     
+    // Get actual page dimensions from PDF (don't assume Letter size!)
+    const firstPage = pdfDoc.getPage(0);
+    const { width: pageWidth, height: pageHeight } = firstPage.getSize();
+    const pageWidthInches = pageWidth / 72; // Convert points to inches
+    const pageHeightInches = pageHeight / 72;
+    
+    console.log(`   📏 PDF page: ${pageWidthInches.toFixed(1)}" x ${pageHeightInches.toFixed(1)}" (aspect: ${(pageWidthInches/pageHeightInches).toFixed(2)})`);
+    
+    // Calculate dimensions based on ACTUAL page size (preserves aspect ratio!)
     const converter = fromPath(inputPath, {
       density: dpi,
       format: "png",
-      width: Math.floor(dpi * 8.5 * resize),
-      height: Math.floor(dpi * 11 * resize),
+      width: Math.floor(dpi * pageWidthInches * resize),
+      height: Math.floor(dpi * pageHeightInches * resize),
     });
     
     const newPdfDoc = await PDFDocument.create();
@@ -440,7 +449,7 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
         
         const compressedImage = await sharp(result.buffer)
           .resize({
-            width: Math.floor(dpi * 8.5 * resize),
+            width: Math.floor(dpi * pageWidthInches * resize),
             fit: 'inside'
           })
           .jpeg({ 
