@@ -320,7 +320,7 @@ async function cleanupFiles(...filePaths) {
 }
 
 // ============================================
-// PDF COMPRESSION - ConvertAPI with target size support
+// PDF COMPRESSION - Smart compression with fallback
 // ============================================
 app.post("/api/compress", upload.single("file"), async (req, res) => {
   let inputPath;
@@ -336,30 +336,23 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
 
     console.log(`📄 Compress request: ${originalSizeKB}KB → Target: ${targetSize || 'auto'}KB`);
 
-    // If no ConvertAPI, fall back to basic compression
-    if (!CONVERTAPI_SECRET) {
-      console.log("⚠️ No ConvertAPI key - using basic compression");
-      return await basicCompress(req, res, inputPath);
-    }
-
-    // If no target size specified, use basic compression
+    // If no target size, use basic compression
     if (!targetSize) {
       console.log("ℹ️ No target size - using basic compression");
       return await basicCompress(req, res, inputPath);
     }
 
-    // Use ConvertAPI with iterative compression to hit target
     const targetSizeKB = parseInt(targetSize);
     const targetBytes = targetSizeKB * 1024;
 
     // If file is already under target, just optimize it
     if (req.file.size <= targetBytes) {
-      console.log(`✅ File already under ${targetSizeKB}KB - optimizing only`);
-      return await compressWithConvertAPI(req, res, inputPath, 90); // High quality optimization
+      console.log(`✅ File already under ${targetSizeKB}KB - light optimization`);
+      return await basicCompress(req, res, inputPath);
     }
 
-    // Iterative compression to hit target size
-    const result = await compressToTargetSize(req, res, inputPath, targetBytes, req.file.originalname);
+    // Try to compress to target (COLOR ONLY - no grayscale)
+    await compressToTargetColorOnly(req, res, inputPath, targetBytes, req.file.originalname, originalSizeKB);
     
   } catch (error) {
     console.error("❌ Compress error:", error.message);
@@ -375,259 +368,282 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
 });
 
 // ============================================
-// HELPER: Compress to specific target size (AGGRESSIVE)
+// HELPER: Color-only compression to target
 // ============================================
-async function compressToTargetSize(req, res, inputPath, targetBytes, originalFilename) {
-  const originalSize = req.file.size;
+async function compressToTargetColorOnly(req, res, inputPath, targetBytes, originalFilename, originalSizeKB) {
   const targetKB = Math.round(targetBytes / 1024);
   
-  // PHASE 1: Try with color, high to low quality
-  const colorQualityLevels = [75, 65, 55, 45, 35, 25, 15, 10, 5];
+  console.log(`🎯 Attempting to compress ${originalSizeKB}KB → ${targetKB}KB (color only)`);
   
-  // PHASE 2: If still too big, try grayscale (much better compression)
-  const grayscaleQualityLevels = [50, 40, 30, 20, 15, 10, 5];
-  
-  let bestResult = null;
-  let bestSize = Infinity;
-  let bestQuality = null;
-  let bestMode = 'color';
-  
-  console.log(`🎯 Target: ${targetKB}KB (${targetBytes} bytes), Original: ${Math.round(originalSize/1024)}KB`);
-  
-  // PHASE 1: COLOR COMPRESSION
-  console.log('📊 Phase 1: Color compression...');
-  for (const quality of colorQualityLevels) {
-    try {
-      const result = await compressWithSettings(inputPath, originalFilename, quality, false);
+  // First, try pdf-lib compression (works for all PDFs)
+  try {
+    const pdfBytes = await fs.readFile(inputPath);
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+
+    // Remove all metadata
+    pdfDoc.setTitle('');
+    pdfDoc.setAuthor('');
+    pdfDoc.setSubject('');
+    pdfDoc.setKeywords([]);
+    pdfDoc.setProducer('');
+    pdfDoc.setCreator('');
+    pdfDoc.setCreationDate(undefined);
+    pdfDoc.setModificationDate(undefined);
+
+    // Aggressive compression with pdf-lib
+    const compressedBytes = await pdfDoc.save({ 
+      useObjectStreams: true,
+      addDefaultPage: false,
+      objectsPerTick: 50
+    });
+
+    const compressedSizeKB = Math.round(compressedBytes.length / 1024);
+    console.log(`📦 pdf-lib result: ${compressedSizeKB}KB`);
+
+    // Check if we hit target
+    if (compressedBytes.length <= targetBytes * 1.05) {
+      const reduction = Math.round(((req.file.size - compressedBytes.length) / req.file.size) * 100);
+      console.log(`✅ Target hit! ${compressedSizeKB}KB ≤ ${targetKB}KB (-${reduction}%)`);
       
-      if (result) {
-        const resultSizeKB = Math.round(result.length / 1024);
-        console.log(`   🔹 Q${quality} color: ${resultSizeKB}KB`);
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+        "Content-Length": compressedBytes.length,
+        "X-Original-Size": req.file.size,
+        "X-Compressed-Size": compressedBytes.length,
+        "X-Compression-Method": "pdf-lib",
+      });
 
-        if (result.length < bestSize) {
-          bestSize = result.length;
-          bestResult = result;
-          bestQuality = quality;
-          bestMode = 'color';
-        }
-
-        // Hit target with 2% margin
-        if (result.length <= targetBytes * 1.02) {
-          console.log(`✅ Target hit! ${resultSizeKB}KB ≤ ${targetKB}KB (Q${quality} color)`);
-          return sendCompressedResponse(res, result, originalSize, originalFilename, quality, 'color', targetBytes);
-        }
-      }
-    } catch (error) {
-      console.error(`   ❌ Q${quality} failed:`, error.message);
+      return res.send(Buffer.from(compressedBytes));
     }
-  }
 
-  // If still above target, try PHASE 2: GRAYSCALE
-  if (bestSize > targetBytes) {
-    console.log('📊 Phase 2: Grayscale compression (aggressive)...');
-    
-    for (const quality of grayscaleQualityLevels) {
-      try {
-        const result = await compressWithSettings(inputPath, originalFilename, quality, true);
+    // If pdf-lib didn't hit target, try ConvertAPI (if available and file has images)
+    if (CONVERTAPI_SECRET) {
+      console.log(`📊 pdf-lib not enough, trying ConvertAPI...`);
+      
+      const result = await tryConvertAPICompression(inputPath, originalFilename, targetBytes, req.file.size);
+      
+      if (result && result.length <= targetBytes * 1.05) {
+        const resultKB = Math.round(result.length / 1024);
+        const reduction = Math.round(((req.file.size - result.length) / req.file.size) * 100);
+        console.log(`✅ ConvertAPI hit target! ${resultKB}KB ≤ ${targetKB}KB (-${reduction}%)`);
         
-        if (result) {
-          const resultSizeKB = Math.round(result.length / 1024);
-          console.log(`   🔸 Q${quality} grayscale: ${resultSizeKB}KB`);
+        res.set({
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+          "Content-Length": result.length,
+          "X-Original-Size": req.file.size,
+          "X-Compressed-Size": result.length,
+          "X-Compression-Method": "convertapi",
+        });
 
-          if (result.length < bestSize) {
-            bestSize = result.length;
-            bestResult = result;
-            bestQuality = quality;
-            bestMode = 'grayscale';
-          }
-
-          // Hit target with 2% margin
-          if (result.length <= targetBytes * 1.02) {
-            console.log(`✅ Target hit! ${resultSizeKB}KB ≤ ${targetKB}KB (Q${quality} grayscale)`);
-            return sendCompressedResponse(res, result, originalSize, originalFilename, quality, 'grayscale', targetBytes);
-          }
-        }
-      } catch (error) {
-        console.error(`   ❌ Q${quality} grayscale failed:`, error.message);
+        return res.send(result);
       }
-    }
-  }
+      
+      // Return best result (ConvertAPI or pdf-lib, whichever is smaller)
+      const bestResult = result && result.length < compressedBytes.length ? result : compressedBytes;
+      const bestSizeKB = Math.round(bestResult.length / 1024);
+      const reduction = Math.round(((req.file.size - bestResult.length) / req.file.size) * 100);
+      
+      console.log(`⚠️ Best effort: ${bestSizeKB}KB (target was ${targetKB}KB, -${reduction}%)`);
+      
+      // Add helpful message for user
+      const message = originalSizeKB > targetKB * 3 
+        ? `This PDF compressed to ${bestSizeKB}KB. For files this large, reaching ${targetKB}KB may require removing content or using lower quality settings.`
+        : `Compressed to ${bestSizeKB}KB (best possible while maintaining quality and color).`;
+      
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+        "Content-Length": bestResult.length,
+        "X-Original-Size": req.file.size,
+        "X-Compressed-Size": bestResult.length,
+        "X-Target-Size": targetBytes,
+        "X-Target-Miss": "true",
+        "X-Compression-Message": message,
+      });
 
-  // Return best result even if target not hit
-  if (bestResult) {
-    const bestSizeKB = Math.round(bestSize / 1024);
-    const reduction = Math.round(((originalSize - bestSize) / originalSize) * 100);
-    
-    console.log(`⚠️ Best effort: ${bestSizeKB}KB (target was ${targetKB}KB, Q${bestQuality} ${bestMode}, -${reduction}%)`);
+      return res.send(bestResult);
+    }
+
+    // No ConvertAPI, return pdf-lib result
+    const reduction = Math.round(((req.file.size - compressedBytes.length) / req.file.size) * 100);
+    console.log(`⚠️ Best effort (pdf-lib only): ${compressedSizeKB}KB (target was ${targetKB}KB, -${reduction}%)`);
     
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
-      "Content-Length": bestSize,
-      "X-Original-Size": originalSize,
-      "X-Compressed-Size": bestSize,
-      "X-Compression-Quality": bestQuality,
-      "X-Compression-Mode": bestMode,
-      "X-Target-Size": targetBytes,
+      "Content-Length": compressedBytes.length,
+      "X-Original-Size": req.file.size,
+      "X-Compressed-Size": compressedBytes.length,
       "X-Target-Miss": "true",
     });
 
-    return res.send(bestResult);
-  }
+    return res.send(Buffer.from(compressedBytes));
 
-  throw new Error("All compression attempts failed");
+  } catch (error) {
+    console.error("❌ Compression failed:", error.message);
+    throw error;
+  }
 }
 
 // ============================================
-// HELPER: Compress with specific settings
+// HELPER: Try ConvertAPI compression (color only)
 // ============================================
-async function compressWithSettings(inputPath, originalFilename, quality, grayscale = false) {
-  const fileBuffer = await fs.readFile(inputPath);
-  const base64File = fileBuffer.toString('base64');
-
-  // Aggressive parameters for maximum compression
-  const parameters = [
-    {
-      Name: "File",
-      FileValue: {
-        Name: originalFilename,
-        Data: base64File
-      }
-    },
-    {
-      Name: "ImageQuality",
-      Value: quality
-    },
-    {
-      Name: "ImageResolution",
-      Value: quality > 40 ? "120" : quality > 20 ? "96" : "72" // Lower DPI for aggressive compression
-    },
-    {
-      Name: "PdfVersion",
-      Value: "1.4" // Older version = better compression
-    }
-  ];
-
-  // Add grayscale conversion for extreme compression
-  if (grayscale) {
-    parameters.push({
-      Name: "ColorSpace",
-      Value: "gray"
-    });
-  }
-
-  const response = await axios.post(
-    `https://v2.convertapi.com/convert/pdf/to/pdf?Secret=${CONVERTAPI_SECRET}`,
-    { Parameters: parameters },
-    {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 90000
-    }
-  );
-
-  if (response.data && response.data.Files && response.data.Files[0]) {
-    const fileInfo = response.data.Files[0];
-    
-    if (fileInfo.FileData) {
-      return Buffer.from(fileInfo.FileData, 'base64');
-    } else if (fileInfo.Url) {
-      const pdfResponse = await axios.get(fileInfo.Url, { 
-        responseType: 'arraybuffer',
-        timeout: 60000
-      });
-      return Buffer.from(pdfResponse.data);
-    }
-  }
-
-  return null;
-}
-
-// ============================================
-// HELPER: Send compressed response
-// ============================================
-function sendCompressedResponse(res, pdfBytes, originalSize, originalFilename, quality, mode, targetBytes) {
-  const reduction = Math.round(((originalSize - pdfBytes.length) / originalSize) * 100);
+async function tryConvertAPICompression(inputPath, originalFilename, targetBytes, originalSize) {
+  const targetKB = Math.round(targetBytes / 1024);
   
-  res.set({
-    "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
-    "Content-Length": pdfBytes.length,
-    "X-Original-Size": originalSize,
-    "X-Compressed-Size": pdfBytes.length,
-    "X-Compression-Quality": quality,
-    "X-Compression-Mode": mode,
-    "X-Target-Size": targetBytes,
-  });
+  // Quality levels to try (color only, no grayscale)
+  const qualityLevels = [60, 45, 30, 20, 15];
+  
+  let bestResult = null;
+  let bestSize = Infinity;
+  
+  for (const quality of qualityLevels) {
+    try {
+      const fileBuffer = await fs.readFile(inputPath);
+      const base64File = fileBuffer.toString('base64');
 
-  return res.send(pdfBytes);
+      console.log(`   🔹 Trying Q${quality}...`);
+
+      const response = await axios.post(
+        `https://v2.convertapi.com/convert/pdf/to/pdf?Secret=${CONVERTAPI_SECRET}`,
+        {
+          Parameters: [
+            {
+              Name: "File",
+              FileValue: {
+                Name: originalFilename,
+                Data: base64File
+              }
+            },
+            {
+              Name: "ImageQuality",
+              Value: quality
+            },
+            {
+              Name: "ImageResolution",
+              Value: quality > 30 ? "150" : "120"
+            }
+          ]
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 45000  // 45 second timeout per attempt
+        }
+      );
+
+      if (response.data && response.data.Files && response.data.Files[0]) {
+        const fileInfo = response.data.Files[0];
+        let pdfBytes;
+        
+        if (fileInfo.FileData) {
+          pdfBytes = Buffer.from(fileInfo.FileData, 'base64');
+        } else if (fileInfo.Url) {
+          const pdfResponse = await axios.get(fileInfo.Url, { 
+            responseType: 'arraybuffer',
+            timeout: 30000
+          });
+          pdfBytes = Buffer.from(pdfResponse.data);
+        }
+
+        if (pdfBytes) {
+          const resultSizeKB = Math.round(pdfBytes.length / 1024);
+          console.log(`      Result: ${resultSizeKB}KB`);
+
+          // Track best result
+          if (pdfBytes.length < bestSize) {
+            bestSize = pdfBytes.length;
+            bestResult = pdfBytes;
+          }
+
+          // If we hit target, return immediately
+          if (pdfBytes.length <= targetBytes * 1.05) {
+            return pdfBytes;
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`      ❌ Q${quality} failed:`, error.message);
+      // Continue to next quality level
+    }
+  }
+
+  return bestResult; // Return best result even if target not hit
 }
 
 // ============================================
 // HELPER: Basic ConvertAPI compression
 // ============================================
 async function compressWithConvertAPI(req, res, inputPath, quality = 60) {
-  const fileBuffer = await fs.readFile(inputPath);
-  const base64File = fileBuffer.toString('base64');
+  try {
+    const fileBuffer = await fs.readFile(inputPath);
+    const base64File = fileBuffer.toString('base64');
 
-  console.log(`📤 ConvertAPI compress (quality: ${quality})`);
+    console.log(`📤 ConvertAPI compress (quality: ${quality})`);
 
-  const response = await axios.post(
-    `https://v2.convertapi.com/convert/pdf/to/pdf?Secret=${CONVERTAPI_SECRET}`,
-    {
-      Parameters: [
-        {
-          Name: "File",
-          FileValue: {
-            Name: req.file.originalname,
-            Data: base64File
+    const response = await axios.post(
+      `https://v2.convertapi.com/convert/pdf/to/pdf?Secret=${CONVERTAPI_SECRET}`,
+      {
+        Parameters: [
+          {
+            Name: "File",
+            FileValue: {
+              Name: req.file.originalname,
+              Data: base64File
+            }
+          },
+          {
+            Name: "ImageQuality",
+            Value: quality
           }
-        },
-        {
-          Name: "ImageQuality",
-          Value: quality
-        }
-      ]
-    },
-    {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 60000
-    }
-  );
+        ]
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 45000
+      }
+    );
 
-  if (response.data && response.data.Files && response.data.Files[0]) {
-    const fileInfo = response.data.Files[0];
-    let pdfBytes;
-    
-    if (fileInfo.FileData) {
-      pdfBytes = Buffer.from(fileInfo.FileData, 'base64');
-    } else if (fileInfo.Url) {
-      const pdfResponse = await axios.get(fileInfo.Url, { 
-        responseType: 'arraybuffer',
-        timeout: 60000
+    if (response.data && response.data.Files && response.data.Files[0]) {
+      const fileInfo = response.data.Files[0];
+      let pdfBytes;
+      
+      if (fileInfo.FileData) {
+        pdfBytes = Buffer.from(fileInfo.FileData, 'base64');
+      } else if (fileInfo.Url) {
+        const pdfResponse = await axios.get(fileInfo.Url, { 
+          responseType: 'arraybuffer',
+          timeout: 30000
+        });
+        pdfBytes = Buffer.from(pdfResponse.data);
+      } else {
+        throw new Error("No FileData or Url in ConvertAPI response");
+      }
+
+      const originalSizeKB = Math.round(req.file.size / 1024);
+      const compressedSizeKB = Math.round(pdfBytes.length / 1024);
+      const reduction = Math.round(((req.file.size - pdfBytes.length) / req.file.size) * 100);
+
+      console.log(`✅ Compressed: ${originalSizeKB}KB → ${compressedSizeKB}KB (-${reduction}%)`);
+
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
+        "Content-Length": pdfBytes.length,
+        "X-Original-Size": req.file.size,
+        "X-Compressed-Size": pdfBytes.length,
       });
-      pdfBytes = Buffer.from(pdfResponse.data);
-    } else {
-      throw new Error("No FileData or Url in ConvertAPI response");
+
+      return res.send(pdfBytes);
     }
 
-    const originalSizeKB = Math.round(req.file.size / 1024);
-    const compressedSizeKB = Math.round(pdfBytes.length / 1024);
-    const reduction = Math.round(((req.file.size - pdfBytes.length) / req.file.size) * 100);
-
-    console.log(`✅ Compressed: ${originalSizeKB}KB → ${compressedSizeKB}KB (-${reduction}%)`);
-
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
-      "Content-Length": pdfBytes.length,
-      "X-Original-Size": req.file.size,
-      "X-Compressed-Size": pdfBytes.length,
-    });
-
-    return res.send(pdfBytes);
+    throw new Error("ConvertAPI returned invalid response");
+  } catch (error) {
+    console.error("❌ ConvertAPI failed:", error.message);
+    // Fall back to basic compression
+    return await basicCompress(req, res, inputPath);
   }
-
-  throw new Error("ConvertAPI returned invalid response");
 }
 
 // ============================================
