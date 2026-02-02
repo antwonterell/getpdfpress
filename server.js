@@ -192,6 +192,60 @@ app.use((req, res, next) => {
 
 app.use(express.static("public"));
 
+// ============================================
+// PAGE ROUTES (for clean URLs)
+// ============================================
+// Main tool pages
+app.get("/compress-pdf-500kb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "compress-pdf-500kb.html"));
+});
+
+app.get("/compress-pdf-200kb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "compress-pdf-200kb.html"));
+});
+
+app.get("/merge-pdf", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "merge-pdf.html"));
+});
+
+app.get("/split-pdf", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "split-pdf.html"));
+});
+
+app.get("/jpg-to-pdf", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "jpg-to-pdf.html"));
+});
+
+app.get("/pdf-to-jpg", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "pdf-to-jpg.html"));
+});
+
+app.get("/pdf-to-word", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "pdf-to-word.html"));
+});
+
+app.get("/word-to-pdf", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "word-to-pdf.html"));
+});
+
+// Info pages
+app.get("/contact", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "contact.html"));
+});
+
+app.get("/privacy", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "privacy.html"));
+});
+
+app.get("/terms", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "terms.html"));
+});
+
+// Learn section
+app.get("/learn", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "index.html"));
+});
+
 // Apply queue to processing endpoints
 app.use('/api/compress', requestQueueMiddleware);
 app.use('/api/merge', requestQueueMiddleware);
