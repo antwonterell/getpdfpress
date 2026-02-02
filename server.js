@@ -895,6 +895,13 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
+// 404 HANDLER (must be after all routes)
+// ============================================
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+});
+
+// ============================================
 // START SERVER
 // ============================================
 const server = app.listen(PORT, () => {
