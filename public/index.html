@@ -977,6 +977,13 @@
             />
           </div>
 
+          <!-- NEW: Mobile upload hint (#5) -->
+          <div class="sm:hidden mt-4 mb-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p class="text-xs text-blue-900 dark:text-blue-200 text-center">
+              📱 <strong>On mobile?</strong> Tap above to pick from Files, Photos, or iCloud/Google Drive
+            </p>
+          </div>
+
           <div id="compressionControls" class="grid md:grid-cols-2 gap-4 mb-2">
             <div>
               <label
@@ -1089,31 +1096,23 @@
               </div>
             </div>
 
-            <div id="compressionStats" class="hidden space-y-2 mb-6 text-sm">
-              <div class="flex justify-between">
-                <span class="text-slate-600 dark:text-slate-300"
-                  >Original:</span
-                >
-                <span
-                  class="font-semibold text-slate-900 dark:text-white"
-                  id="originalSize"
-                ></span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-600 dark:text-slate-300"
-                  >Processed:</span
-                >
-                <span
-                  class="font-semibold text-green-700 dark:text-green-400"
-                  id="compressedSize"
-                ></span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-600 dark:text-slate-300">Saved:</span>
-                <span
-                  class="font-semibold text-slate-900 dark:text-white"
-                  id="savedAmount"
-                ></span>
+            <!-- NEW: Visual file size preview (#3) -->
+            <div id="compressionStats" class="hidden mb-6">
+              <div class="flex items-center justify-between p-5 bg-gradient-to-r from-red-50 to-green-50 dark:from-red-900/20 dark:to-green-900/20 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div class="text-center flex-1">
+                  <div class="text-2xl font-bold text-red-600 dark:text-red-400" id="originalSize"></div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Original</div>
+                </div>
+                <div class="text-3xl text-slate-400 dark:text-slate-500 px-3">→</div>
+                <div class="text-center flex-1">
+                  <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="compressedSize"></div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Compressed</div>
+                </div>
+                <div class="text-3xl text-slate-400 dark:text-slate-500 px-3">=</div>
+                <div class="text-center flex-1">
+                  <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="savedAmount"></div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Saved</div>
+                </div>
               </div>
             </div>
 
@@ -1141,6 +1140,18 @@
                 Start Over
               </button>
             </div>
+            
+            <!-- NEW: Success indicator with social proof (#1) -->
+            <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p class="text-sm text-blue-900 dark:text-blue-200">
+                ✓ <strong>Ready for upload!</strong> Join 10,000+ people this month who successfully compressed for job portals, visa applications, and email.
+              </p>
+            </div>
+            
+            <!-- NEW: One more step micro-copy (#4) -->
+            <p class="text-xs text-center text-slate-500 dark:text-slate-400 mt-3">
+              💡 <strong>Next:</strong> Upload this file to your portal. Most sites accept it immediately.
+            </p>
           </div>
         </div>
       </section>
@@ -1364,6 +1375,58 @@
         </h2>
 
         <div class="space-y-6">
+          <!-- NEW FAQ: Which size + use cases -->
+          <details
+            class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm"
+            open
+          >
+            <summary
+              class="font-semibold text-lg cursor-pointer text-slate-900 dark:text-white"
+            >
+              Which file size should I choose? (500KB, 200KB, or 100KB)
+            </summary>
+            <div class="mt-4 space-y-4">
+              <p class="text-slate-600 dark:text-slate-300">
+                The right size depends on where you're uploading. Here's what works for the most common situations:
+              </p>
+              
+              <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div class="text-2xl mb-2">💼</div>
+                  <div class="font-bold text-slate-900 dark:text-white mb-2">500KB</div>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    <strong>Job applications:</strong> Indeed, LinkedIn, ZipRecruiter, Workday<br>
+                    <strong>Email:</strong> Gmail, Outlook, most providers<br>
+                    <strong>General uploads:</strong> Most online forms
+                  </p>
+                </div>
+                
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                  <div class="text-2xl mb-2">🛂</div>
+                  <div class="font-bold text-slate-900 dark:text-white mb-2">200KB</div>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    <strong>Government portals:</strong> USCIS, visa applications, DMV<br>
+                    <strong>School submissions:</strong> College applications, financial aid<br>
+                    <strong>Strict systems:</strong> When 500KB fails
+                  </p>
+                </div>
+                
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                  <div class="text-2xl mb-2">📋</div>
+                  <div class="font-bold text-slate-900 dark:text-white mb-2">100KB</div>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    <strong>Very strict limits:</strong> Rare, but some systems require it<br>
+                    <strong>Try 200KB first:</strong> 100KB may reduce quality noticeably
+                  </p>
+                </div>
+              </div>
+              
+              <p class="text-sm text-slate-500 dark:text-slate-400 italic">
+                💡 Tip: Start with 500KB. If your portal rejects it, try 200KB. Most issues are solved at these two levels.
+              </p>
+            </div>
+          </details>
+
           <details
             class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm"
           >
