@@ -246,6 +246,54 @@ app.get("/learn", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "learn", "index.html"));
 });
 
+app.get("/learn/best-free-pdf-compressor", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "best-free-pdf-compressor.html"));
+});
+
+app.get("/learn/compress-pdf-for-job-application", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "compress-pdf-for-job-application.html"));
+});
+
+app.get("/learn/compress-pdf-without-losing-quality", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "compress-pdf-without-losing-quality.html"));
+});
+
+app.get("/learn/how-to-compress-pdf-to-200kb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "how-to-compress-pdf-to-200kb.html"));
+});
+
+app.get("/learn/how-to-compress-pdf-to-500kb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "how-to-compress-pdf-to-500kb.html"));
+});
+
+app.get("/learn/how-to-merge-multiple-pdfs", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "how-to-merge-multiple-pdfs.html"));
+});
+
+app.get("/learn/how-to-split-pdf-pages", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "how-to-split-pdf-pages.html"));
+});
+
+app.get("/learn/jpg-to-pdf-converter-guide", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "jpg-to-pdf-converter-guide.html"));
+});
+
+app.get("/learn/pdf-compression-for-mobile", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "pdf-compression-for-mobile.html"));
+});
+
+app.get("/learn/pdf-file-size-limits-2026", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "pdf-file-size-limits-2026.html"));
+});
+
+app.get("/learn/pdf-to-word-conversion-guide", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "pdf-to-word-conversion-guide.html"));
+});
+
+app.get("/learn/why-is-my-pdf-so-large", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "learn", "why-is-my-pdf-so-large.html"));
+});
+
 // Apply queue to processing endpoints
 app.use('/api/compress', requestQueueMiddleware);
 app.use('/api/merge', requestQueueMiddleware);
