@@ -1,45 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-  <!-- Core / Tools -->
-  <url><loc>https://getpdfpress.com/</loc></url>
-  <url><loc>https://getpdfpress.com/compress-pdf-500kb</loc></url>
-  <url><loc>https://getpdfpress.com/compress-pdf-200kb</loc></url>
-  <url><loc>https://getpdfpress.com/pdf-to-jpg</loc></url>
-  <url><loc>https://getpdfpress.com/jpg-to-pdf</loc></url>
-  <url><loc>https://getpdfpress.com/pdf-to-word</loc></url>
-  <url><loc>https://getpdfpress.com/word-to-pdf</loc></url>
-  <url><loc>https://getpdfpress.com/merge-pdf</loc></url>
-  <url><loc>https://getpdfpress.com/split-pdf</loc></url>
-
-  <!-- Learn hub -->
-  <url><loc>https://getpdfpress.com/learn</loc></url>
-
-  <!-- Learn guides -->
-  <url><loc>https://getpdfpress.com/learn/how-to-compress-pdf-to-500kb</loc></url>
-  <url><loc>https://getpdfpress.com/learn/how-to-compress-pdf-to-200kb</loc></url>
-  <url><loc>https://getpdfpress.com/learn/why-is-my-pdf-so-large</loc></url>
-  <url><loc>https://getpdfpress.com/learn/compress-pdf-without-losing-quality</loc></url>
-  <url><loc>https://getpdfpress.com/learn/pdf-compression-for-mobile</loc></url>
-  <url><loc>https://getpdfpress.com/learn/best-free-pdf-compressor</loc></url>
-  <url><loc>https://getpdfpress.com/learn/compress-pdf-for-job-application</loc></url>
-  <url><loc>https://getpdfpress.com/learn/how-to-merge-multiple-pdfs</loc></url>
-  <url><loc>https://getpdfpress.com/learn/how-to-split-pdf-pages</loc></url>
-  <url><loc>https://getpdfpress.com/learn/jpg-to-pdf-converter-guide</loc></url>
-  <url><loc>https://getpdfpress.com/learn/pdf-to-word-conversion-guide</loc></url>
-  <url><loc>https://getpdfpress.com/learn/pdf-file-size-limits-2026</loc></url>
-
-  <!-- Legal / company -->
-  <url><loc>https://getpdfpress.com/contact</loc></url>
-  <url><loc>https://getpdfpress.com/privacy</loc></url>
-  <url><loc>https://getpdfpress.com/terms</loc></url>
-
-  <url><loc>https://getpdfpress.com/learn/compress-pdf-for-uscis-immigration</loc></url>
-  <url><loc>https://getpdfpress.com/learn/pdf-too-large-for-upload</loc></url>
-  <url><loc>https://getpdfpress.com/learn/compress-scanned-pdf-readable</loc></url>
-  <url><loc>https://getpdfpress.com/learn/best-pdf-size-for-email</loc></url>
-  <url><loc>https://getpdfpress.com/learn/reduce-pdf-size-iphone</loc></url>
-  <url><loc>https://getpdfpress.com/learn/reduce-pdf-size-android</loc></url>
-  <url><loc>https://getpdfpress.com/learn/pdf-compression-vs-quality</loc></url>
-
+<url><loc>https://getpdfpress.com/</loc></url>
+<url><loc>https://getpdfpress.com/compress-pdf-500kb</loc></url>
+<url><loc>https://getpdfpress.com/compress-pdf-200kb</loc></url>
+<url><loc>https://getpdfpress.com/merge-pdf</loc></url>
+<url><loc>https://getpdfpress.com/split-pdf</loc></url>
+<url><loc>https://getpdfpress.com/jpg-to-pdf</loc></url>
+<url><loc>https://getpdfpress.com/pdf-to-jpg</loc></url>
+<url><loc>https://getpdfpress.com/pdf-to-word</loc></url>
+<url><loc>https://getpdfpress.com/word-to-pdf</loc></url>
+<url><loc>https://getpdfpress.com/learn</loc></url>
+<url><loc>https://getpdfpress.com/privacy</loc></url>
+<url><loc>https://getpdfpress.com/terms</loc></url>
+<url><loc>https://getpdfpress.com/contact</loc></url>
+<url><loc>https://getpdfpress.com/learn/how-to-compress-pdf-to-500kb</loc></url>
+<url><loc>https://getpdfpress.com/learn/how-to-compress-pdf-to-200kb</loc></url>
+<url><loc>https://getpdfpress.com/learn/why-is-my-pdf-so-large</loc></url>
+<url><loc>https://getpdfpress.com/learn/compress-pdf-for-job-application</loc></url>
+<url><loc>https://getpdfpress.com/learn/compress-pdf-without-losing-quality</loc></url>
+<url><loc>https://getpdfpress.com/learn/pdf-file-size-limits-2026</loc></url>
+<url><loc>https://getpdfpress.com/learn/pdf-compression-for-mobile</loc></url>
+<url><loc>https://getpdfpress.com/learn/best-free-pdf-compressor</loc></url>
+<url><loc>https://getpdfpress.com/learn/jpg-to-pdf-converter-guide</loc></url>
+<url><loc>https://getpdfpress.com/learn/pdf-to-word-conversion-guide</loc></url>
+<url><loc>https://getpdfpress.com/learn/pdf-too-large-for-upload</loc></url>
+<url><loc>https://getpdfpress.com/learn/compress-pdf-for-uscis-or-immigration-forms</loc></url>
+<url><loc>https://getpdfpress.com/learn/best-pdf-size-for-email-attachments</loc></url>
+<url><loc>https://getpdfpress.com/learn/reduce-pdf-file-size-on-iphone</loc></url>
+<url><loc>https://getpdfpress.com/learn/reduce-pdf-file-size-on-android</loc></url>
+<url><loc>https://getpdfpress.com/learn/pdf-compression-vs-pdf-quality</loc></url>
+<url><loc>https://getpdfpress.com/learn/how-to-merge-multiple-pdfs</loc></url>
+<url><loc>https://getpdfpress.com/learn/how-to-split-pdf-pages</loc></url>
 </urlset>

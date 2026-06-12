@@ -21,18 +21,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies (npm ci when the lockfile is present = reproducible builds)
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+# Install production dependencies (using npm install since no package-lock.json)
+RUN npm install --omit=dev
 
 # Copy application code
 COPY . .
 
-# Build Tailwind CSS if needed
-RUN if [ -f "tailwind.config.js" ]; then \
-      npm install --no-save tailwindcss@^3.4.1 postcss@^8.4.35 autoprefixer@^10.4.17 && \
-      npx tailwindcss -i ./src/input.css -o ./public/output.css --minify && \
-      npm uninstall tailwindcss postcss autoprefixer; \
-    fi
+# Build the production CSS without using Tailwind CDN
+RUN npm run build:css
 
 # Create directories
 RUN mkdir -p uploads output public && \
