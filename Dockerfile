@@ -21,8 +21,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies (using npm install since no package-lock.json)
-RUN npm install --omit=dev
+# Install production dependencies (npm ci when the lockfile is present = reproducible builds)
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
 
 # Copy application code
 COPY . .

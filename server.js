@@ -3,6 +3,7 @@
 // No hacks, no crashes, just reliable PDF processing
 
 const express = require("express");
+const compression = require("compression");
 const multer = require("multer");
 const cors = require("cors");
 const fs = require("fs").promises;
@@ -171,14 +172,32 @@ app.use(
 );
 app.use(express.json({ limit: '10mb' }));
 
+// Gzip/deflate response compression (HTML, CSS, JSON - PDFs are already compressed)
+app.use(compression());
+
 // Canonical domain enforcement
 app.use((req, res, next) => {
   const host = req.headers.host || '';
-  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  
+  const forwardedProto = req.headers['x-forwarded-proto'];
+
+  // Skip for local/dev traffic and internal health checks.
+  // No x-forwarded-proto header = request didn't come through the proxy
+  // (e.g. Docker HEALTHCHECK hitting localhost) - redirecting those breaks them.
+  if (
+    !forwardedProto ||
+    host.startsWith('localhost') ||
+    host.startsWith('127.') ||
+    req.path === '/api/health'
+  ) {
+    return next();
+  }
+
+  // x-forwarded-proto can be a list like "https,http" - use the first value
+  const protocol = String(forwardedProto).split(',')[0].trim();
+
   const isWWW = host.startsWith('www.');
   const isHTTP = protocol === 'http';
-  
+
   if (isWWW || isHTTP) {
     const canonicalHost = host.replace(/^www\./, '');
     const canonicalURL = `https://${canonicalHost}${req.originalUrl}`;
@@ -190,7 +209,23 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static("public"));
+app.use(
+  express.static("public", {
+    redirect: false, // let app routes handle directory paths like /learn
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".html")) {
+        // HTML: always revalidate so deploys show up immediately
+        res.setHeader("Cache-Control", "no-cache");
+      } else {
+        // CSS/images/etc: cache for a day, serve stale while revalidating
+        res.setHeader(
+          "Cache-Control",
+          "public, max-age=86400, stale-while-revalidate=604800",
+        );
+      }
+    },
+  }),
+);
 
 // ============================================
 // PAGE ROUTES (for clean URLs)
@@ -246,52 +281,14 @@ app.get("/learn", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "learn", "index.html"));
 });
 
-app.get("/learn/best-free-pdf-compressor", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "best-free-pdf-compressor.html"));
-});
-
-app.get("/learn/compress-pdf-for-job-application", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "compress-pdf-for-job-application.html"));
-});
-
-app.get("/learn/compress-pdf-without-losing-quality", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "compress-pdf-without-losing-quality.html"));
-});
-
-app.get("/learn/how-to-compress-pdf-to-200kb", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "how-to-compress-pdf-to-200kb.html"));
-});
-
-app.get("/learn/how-to-compress-pdf-to-500kb", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "how-to-compress-pdf-to-500kb.html"));
-});
-
-app.get("/learn/how-to-merge-multiple-pdfs", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "how-to-merge-multiple-pdfs.html"));
-});
-
-app.get("/learn/how-to-split-pdf-pages", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "how-to-split-pdf-pages.html"));
-});
-
-app.get("/learn/jpg-to-pdf-converter-guide", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "jpg-to-pdf-converter-guide.html"));
-});
-
-app.get("/learn/pdf-compression-for-mobile", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "pdf-compression-for-mobile.html"));
-});
-
-app.get("/learn/pdf-file-size-limits-2026", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "pdf-file-size-limits-2026.html"));
-});
-
-app.get("/learn/pdf-to-word-conversion-guide", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "pdf-to-word-conversion-guide.html"));
-});
-
-app.get("/learn/why-is-my-pdf-so-large", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "learn", "why-is-my-pdf-so-large.html"));
+// Any /learn/<slug> serves public/learn/<slug>.html if it exists.
+// Slug is whitelisted to [a-z0-9-] so no path traversal is possible.
+app.get("/learn/:slug([a-z0-9-]+)", (req, res, next) => {
+  const filePath = path.join(__dirname, "public", "learn", `${req.params.slug}.html`);
+  if (fsSync.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+  next(); // falls through to 404 handler
 });
 
 // Apply queue to processing endpoints
@@ -331,18 +328,30 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
     }
 
     inputPath = req.file.path;
-    const targetSize = req.body.targetSize; // "500" or "200" (in KB)
+
+    // Reject non-PDFs early with a clear message
+    const isPdf =
+      req.file.mimetype === "application/pdf" ||
+      /\.pdf$/i.test(req.file.originalname || "");
+    if (!isPdf) {
+      return res.status(400).json({
+        error: "Not a PDF",
+        message: "Please upload a PDF file (.pdf).",
+      });
+    }
+
+    const targetSize = req.body.targetSize; // "500", "200", "100", or "auto" (in KB)
     const originalSizeKB = Math.round(req.file.size / 1024);
 
     console.log(`📄 Compress request: ${originalSizeKB}KB → Target: ${targetSize || 'auto'}KB`);
 
-    // If no target size, use basic compression
-    if (!targetSize) {
-      console.log("ℹ️ No target size - using basic compression");
+    // If no target size (or "auto"/invalid), use basic compression
+    if (!targetSize || targetSize === "auto" || isNaN(parseInt(targetSize, 10))) {
+      console.log("ℹ️ No numeric target size - using basic compression");
       return await basicCompress(req, res, inputPath);
     }
 
-    const targetSizeKB = parseInt(targetSize);
+    const targetSizeKB = parseInt(targetSize, 10);
     const targetBytes = targetSizeKB * 1024;
 
     // If file is already under target, just optimize it
@@ -351,8 +360,12 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
       return await basicCompress(req, res, inputPath);
     }
 
+    // Compression level: gentle = favor quality, strong = favor size
+    const level = String(req.body.compressionLevel || "balanced").toLowerCase();
+    const qualityBias = level === "gentle" ? 10 : level === "strong" ? -10 : 0;
+
     // Try to compress to target (COLOR ONLY - no grayscale)
-    await compressToTargetColorOnly(req, res, inputPath, targetBytes, req.file.originalname, originalSizeKB);
+    await compressToTargetColorOnly(req, res, inputPath, targetBytes, req.file.originalname, originalSizeKB, qualityBias);
     
   } catch (error) {
     console.error("❌ Compress error:", error.message);
@@ -368,9 +381,41 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
 });
 
 // ============================================
+// HELPER: single render pass at fixed settings (used by the retry logic)
+// ============================================
+async function compressViaImagesPass(inputPath, targetBytes, dpi, quality, resize, pageCount, maxPages, pageWidthInches) {
+  try {
+    const converter = fromPath(inputPath, {
+      density: dpi,
+      format: "png",
+      width: Math.floor(dpi * pageWidthInches * resize),
+    });
+    const doc = await PDFDocument.create();
+    let processed = 0;
+    for (let i = 1; i <= Math.min(pageCount, maxPages); i++) {
+      try {
+        const result = await converter(i, { responseType: "buffer" });
+        const jpg = await sharp(result.buffer)
+          .resize({ width: Math.floor(dpi * pageWidthInches * resize), fit: "inside" })
+          .jpeg({ quality, progressive: true, mozjpeg: true })
+          .toBuffer();
+        const img = await doc.embedJpg(jpg);
+        const page = doc.addPage([img.width, img.height]);
+        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        processed++;
+      } catch (_) { continue; }
+    }
+    if (processed === 0) return null;
+    return await doc.save({ useObjectStreams: true });
+  } catch (_) {
+    return null;
+  }
+}
+
+// ============================================
 // HELPER: PDF → Images → PDF (NUCLEAR OPTION - Always works!)
 // ============================================
-async function compressViaImages(inputPath, targetBytes, originalFilename, originalSize) {
+async function compressViaImages(inputPath, targetBytes, originalFilename, originalSize, qualityBias = 0, isRetry = false) {
   console.log(`🎨 PDF→Images→PDF method (works on ANY PDF!)`);
   
   try {
@@ -414,6 +459,9 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
       dpi = 48; quality = 15; resize = 0.7;
     }
     
+    // Apply user-selected compression level (gentle/balanced/strong)
+    quality = Math.min(90, Math.max(10, quality + qualityBias));
+
     console.log(`   🎯 ${dpi} DPI, Q${quality}, resize: ${resize}`);
     
     // Limit pages for extreme compression (prevent timeout)
@@ -493,10 +541,25 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
       throw new Error("No pages could be processed");
     }
     
-    const finalPdfBytes = await newPdfDoc.save({ useObjectStreams: true });
-    const finalSizeKB = Math.round(finalPdfBytes.length / 1024);
+    let finalPdfBytes = await newPdfDoc.save({ useObjectStreams: true });
+    let finalSizeKB = Math.round(finalPdfBytes.length / 1024);
     
     console.log(`   ✅ Result: ${finalSizeKB}KB (${processedPages} pages)`);
+
+    // RETRY PASS: if we missed the target and have quality headroom, try once more
+    // at lower DPI/quality instead of giving up on the first guess.
+    if (finalPdfBytes.length > targetBytes * 1.15 && quality > 18 && !isRetry) {
+      const ratio = targetBytes / finalPdfBytes.length;
+      const retryQuality = Math.max(12, Math.round(quality * Math.max(0.4, ratio)));
+      const retryResize = Math.max(0.5, resize * Math.max(0.6, Math.sqrt(ratio)));
+      console.log(`   🔁 Retry pass: Q${retryQuality}, resize ${retryResize.toFixed(2)}`);
+      const retry = await compressViaImagesPass(inputPath, targetBytes, dpi, retryQuality, retryResize, pageCount, maxPages, pageWidthInches);
+      if (retry && retry.length < finalPdfBytes.length) {
+        finalPdfBytes = retry;
+        finalSizeKB = Math.round(finalPdfBytes.length / 1024);
+        console.log(`   ✅ Retry result: ${finalSizeKB}KB`);
+      }
+    }
     
     return {
       bytes: finalPdfBytes,
@@ -515,7 +578,7 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
 // ============================================
 // HELPER: 3-METHOD HYBRID COMPRESSION (FIXED)
 // ============================================
-async function compressToTargetColorOnly(req, res, inputPath, targetBytes, originalFilename, originalSizeKB) {
+async function compressToTargetColorOnly(req, res, inputPath, targetBytes, originalFilename, originalSizeKB, qualityBias = 0) {
   const targetKB = Math.round(targetBytes / 1024);
   const originalSize = req.file.size;
   
@@ -615,7 +678,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
   // Only use if target is reasonable (>3KB per page) OR if user really wants it
   if (kbPerPage >= 3 || targetKB <= 500) {
     console.log(`📊 Method 3: PDF→Images→PDF (extreme compression)...`);
-    const imageResult = await compressViaImages(inputPath, targetBytes, originalFilename, originalSize);
+    const imageResult = await compressViaImages(inputPath, targetBytes, originalFilename, originalSize, qualityBias);
     
     if (imageResult) {
       method3Result = imageResult.bytes;
@@ -636,7 +699,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
           "X-Compression-Quality": imageResult.quality,
         });
 
-        return res.send(imageResult.bytes);
+        return res.send(Buffer.from(imageResult.bytes));
       }
       
       console.log(`   Result: ${method3KB}KB (close but not quite)`);
@@ -674,7 +737,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     warningMessage = `Compressed to ${bestSizeKB}KB (best possible while maintaining readability). For ${targetKB}KB target with ${pageCount} pages, consider removing unnecessary pages or splitting the document.`;
   }
   
-  res.set({
+  const missHeaders = {
     "Content-Type": "application/pdf",
     "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
     "Content-Length": bestResult.bytes.length,
@@ -683,10 +746,11 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     "X-Compression-Method": bestResult.method,
     "X-Target-Size": targetBytes,
     "X-Target-Miss": "true",
-    "X-Warning-Message": warningMessage || undefined,
-  });
+  };
+  if (warningMessage) missHeaders["X-Warning-Message"] = warningMessage;
+  res.set(missHeaders);
 
-  return res.send(bestResult.bytes);
+  return res.send(Buffer.from(bestResult.bytes));
 }
 
 // ============================================
@@ -1023,6 +1087,16 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pageCount = pdfDoc.getPageCount();
 
+    // Memory guard: base64 previews of very long PDFs can exhaust the
+    // container's RAM. 50 pages at 200 DPI is a safe ceiling on Starter.
+    const MAX_P2I_PAGES = 50;
+    if (pageCount > MAX_P2I_PAGES) {
+      return res.status(413).json({
+        error: "Too many pages",
+        message: `This PDF has ${pageCount} pages. PDF to JPG currently supports up to ${MAX_P2I_PAGES} pages - split the PDF first, then convert each part.`,
+      });
+    }
+
     console.log(`📄 Converting ${pageCount} page(s) to images...`);
 
     // FIXED: Remove width/height to preserve aspect ratio
@@ -1155,6 +1229,14 @@ app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
     const { PDFDocument } = require("pdf-lib");
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pageCount = pdfDoc.getPageCount();
+
+    const MAX_P2I_PAGES = 50;
+    if (pageCount > MAX_P2I_PAGES) {
+      return res.status(413).json({
+        error: "Too many pages",
+        message: `This PDF has ${pageCount} pages. PDF to JPG currently supports up to ${MAX_P2I_PAGES} pages - split the PDF first, then convert each part.`,
+      });
+    }
 
     console.log(`📦 Creating ZIP with ${pageCount} images...`);
 
@@ -1307,8 +1389,8 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
       }
     );
 
-    // Log the full response for debugging
-    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+    // NOTE: never log the full ConvertAPI response - it contains the user's file as base64
+    console.log('🔍 ConvertAPI responded:', response.status, '-', response.data?.Files?.length || 0, 'file(s)');
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];
@@ -1402,8 +1484,8 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
       }
     );
 
-    // Log the full response for debugging
-    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+    // NOTE: never log the full ConvertAPI response - it contains the user's file as base64
+    console.log('🔍 ConvertAPI responded:', response.status, '-', response.data?.Files?.length || 0, 'file(s)');
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];

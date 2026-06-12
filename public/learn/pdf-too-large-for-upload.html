@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Too Large for Upload: What to Do | getPDFpress Learning Center</title>
+    <meta name="description" content="Upload rejected for file size? A practical decision tree: compress, split, re-scan, or convert — and how to tell which one your situation needs.">
+    <meta name="author" content="getPDFpress">
+    <link rel="canonical" href="https://getpdfpress.com/learn/pdf-too-large-for-upload">
+    <meta property="og:title" content="PDF Too Large for Upload: What to Do">
+    <meta property="og:description" content="Upload rejected for file size? A practical decision tree: compress, split, re-scan, or convert — and how to tell which one your situation needs.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getpdfpress.com/learn/pdf-too-large-for-upload">
+    <meta property="og:image" content="https://getpdfpress.com/og-pdfpress.png">
+    <link rel="stylesheet" href="/output.css" />
+    <!-- ADSENSE (add after approval): paste the AdSense Auto Ads <script> here. -->
+    <style>
+        .article-content h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #0f172a; }
+        .article-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1e293b; }
+        .article-content p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
+        .article-content ul, .article-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+        .article-content ol { list-style: decimal; }
+        .article-content ul { list-style: disc; }
+        .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
+    </style>
+    <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "PDF Too Large for Upload: What to Do", "description": "Upload rejected for file size? A practical decision tree: compress, split, re-scan, or convert \u2014 and how to tell which one your situation needs.", "author": {"@type": "Organization", "name": "getPDFpress"}, "publisher": {"@type": "Organization", "name": "getPDFpress", "url": "https://getpdfpress.com"}, "mainEntityOfPage": "https://getpdfpress.com/learn/pdf-too-large-for-upload", "dateModified": "2026-06-11"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much can a PDF realistically be compressed?", "acceptedAnswer": {"@type": "Answer", "text": "Text-based PDFs can often shrink 50\u201390% with no visible quality loss. Scanned PDFs vary: a bloated 300 DPI color scan may compress 80%+, while an already-optimized file may barely move. If a file won't compress, it's usually already efficient."}}, {"@type": "Question", "name": "Why does my PDF upload fail even under the limit?", "acceptedAnswer": {"@type": "Answer", "text": "Common non-size causes: special characters in the filename, the wrong format, non-standard page dimensions, or password protection. Rename the file to plain letters and numbers, and unlock encrypted PDFs before uploading."}}, {"@type": "Question", "name": "Is it better to split or compress?", "acceptedAnswer": {"@type": "Answer", "text": "Compress first \u2014 it keeps everything in one file, which most portals prefer. Split when the file is enormous relative to the limit, when the portal accepts multiple uploads, or when compression alone would make pages unreadable."}}, {"@type": "Question", "name": "Do online compressors keep my file private?", "acceptedAnswer": {"@type": "Answer", "text": "Policies vary by tool, so check before uploading sensitive documents. getPDFpress processes files on secure servers and deletes them automatically after processing \u2014 see our privacy policy for details."}}]}]}</script>
+</head>
+<body class="bg-white text-slate-900">
+    <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-black text-blue-600 flex items-center gap-2">
+                <span>📄</span> getPDFpress
+            </a>
+            <div class="hidden md:flex space-x-6 text-sm font-semibold text-slate-600">
+                <a href="/" class="hover:text-blue-600 transition">Tools</a>
+                <a href="/learn" class="text-blue-600">Learn</a>
+                <a href="/contact" class="hover:text-blue-600 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="bg-slate-50 border-b border-slate-200 py-3">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <nav class="flex text-sm text-slate-600">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <span class="mx-2">/</span>
+                <a href="/learn" class="hover:text-blue-600">Learn</a>
+                <span class="mx-2">/</span>
+                <span class="text-slate-900 font-semibold">PDF Too Large for Upload</span>
+            </nav>
+        </div>
+    </div>
+
+    <article class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <header class="mb-10">
+            <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full">TROUBLESHOOTING</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold mt-4 mb-6">“PDF Too Large”: What to Do When an Upload Is Rejected</h1>
+            <div class="flex items-center gap-4 text-sm text-slate-600 pb-6 border-b">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">📄</div>
+                    <div>
+                        <div class="font-semibold text-slate-900">getPDFpress Team</div>
+                        <div class="text-xs">PDF tools &amp; guides</div>
+                    </div>
+                </div>
+                <span class="text-slate-300">•</span>
+                <time datetime="2026-06-11">Updated June 11, 2026</time>
+            </div>
+        </header>
+
+        <!-- Quick answer -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 rounded-r-xl p-6 mb-10">
+            <h2 class="font-bold text-lg mb-2 text-slate-900">Quick answer</h2>
+            <p class="text-slate-700 leading-relaxed">First find the portal's actual limit (it's usually in the error message or next to the upload button). Then: if your PDF is up to ~10× over the limit, <strong>compress</strong> it. If it's a huge multi-document file, <strong>split</strong> it into parts. If it's a scan that won't compress enough, <strong>re-scan at 150–200 DPI grayscale</strong>. Most upload failures are solved by compression alone.</p>
+        </div>
+
+        <!-- Table of contents -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10">
+            <h2 class="font-bold mb-3 text-slate-900">In this guide</h2>
+            <ol class="space-y-1 text-sm list-decimal pl-5">
+                <li><a href="#find-limit" class="text-blue-600 hover:underline">Step 1: Find the real limit</a></li>
+                <li><a href="#decision" class="text-blue-600 hover:underline">Step 2: Pick the right fix</a></li>
+                <li><a href="#compress" class="text-blue-600 hover:underline">Fix A: Compress the PDF</a></li>
+                <li><a href="#split" class="text-blue-600 hover:underline">Fix B: Split into smaller files</a></li>
+                <li><a href="#rescan" class="text-blue-600 hover:underline">Fix C: Re-scan or re-export</a></li>
+                <li><a href="#edge" class="text-blue-600 hover:underline">When the file size isn&#x27;t actually the problem</a></li>
+            </ol>
+        </div>
+
+        <div class="article-content">
+
+            <h2 id="find-limit">Step 1: Find the real limit</h2>
+            <p>Portals phrase limits differently: "max 500KB", "file must be smaller than 2MB", or just a generic "upload failed". Check the error message, the help text near the upload field, and the site's FAQ. If you genuinely can't find a number, aim for 500KB — it clears the majority of strict forms — and try 200KB if that still fails.</p>
+            <p>Watch the units: 500KB is half of one MB. A 4MB file isn't "a bit over" a 500KB limit — it's 8× over.</p>
+
+            <h2 id="decision">Step 2: Pick the right fix</h2>
+            <ul>
+                <li><strong>File is 1–10× over the limit</strong> → compress it (Fix A). This solves most cases.</li>
+                <li><strong>File is way over (e.g., 40MB vs a 500KB limit) and has many pages</strong> → split it first, then compress each part (Fix B).</li>
+                <li><strong>File is a scan that stays big even after strong compression</strong> → re-scan smarter (Fix C).</li>
+                <li><strong>File is already small but still rejected</strong> → the problem probably isn't size (see the last section).</li>
+            </ul>
+
+            <h2 id="compress">Fix A: Compress the PDF</h2>
+            <p>Upload your file to the <a href="/compress-pdf-500kb" class="text-blue-600 hover:underline">getPDFpress compressor</a>, pick the target that matches your portal (500KB, 200KB, or 100KB), and download the result. Text-heavy PDFs compress dramatically with no visible change; scans and photos lose some sharpness at aggressive targets. Targets are best-effort — if the result misses the target, the tool tells you honestly and gives you the smallest readable version.</p>
+
+            <h2 id="split">Fix B: Split into smaller files</h2>
+            <p>If the portal allows multiple uploads, <a href="/split-pdf" class="text-blue-600 hover:underline">split your PDF</a> into logical parts — by chapter, by document, or simply "part 1 / part 2". Splitting a 60-page bundle into three 20-page files often gets each part under the limit with much gentler compression, which means better quality.</p>
+
+            <h2 id="rescan">Fix C: Re-scan or re-export</h2>
+            <p>Scanned PDFs are images in disguise, and a bad scan can't always be salvaged. If compression makes your scan unreadable before it's small enough:</p>
+            <ul>
+                <li>Re-scan at <strong>150–200 DPI</strong> instead of 300–600.</li>
+                <li>Use <strong>grayscale or black &amp; white</strong> instead of color.</li>
+                <li>If the document exists digitally (Word, Google Docs), export to PDF instead of scanning a printout — a digitally exported PDF of the same content can be 10–50× smaller.</li>
+            </ul>
+
+            <h2 id="edge">When the file size isn't actually the problem</h2>
+            <p>If your file is under the limit and still rejected, check these in order: the <strong>filename</strong> (some portals reject spaces and special characters — rename to letters and numbers only), the <strong>format</strong> (the portal may want PDF specifically, not JPG, or vice versa — our <a href="/jpg-to-pdf" class="text-blue-600 hover:underline">JPG to PDF</a> tool helps), <strong>page dimensions</strong> (a few portals require Letter/A4 pages), and <strong>password protection</strong> (encrypted PDFs are often refused — remove the password first).</p>
+ 
+        </div>
+
+        <!-- FAQs -->
+        <section class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
+            <div class="space-y-5">
+                <div class="border border-slate-200 rounded-xl p-5">
+                    <h3 class="font-bold mb-2 text-slate-900">How much can a PDF realistically be compressed?</h3>
+                    <p class="text-slate-600 leading-relaxed">Text-based PDFs can often shrink 50–90% with no visible quality loss. Scanned PDFs vary: a bloated 300 DPI color scan may compress 80%+, while an already-optimized file may barely move. If a file won't compress, it's usually already efficient.</p>
+                </div>
+                <div class="border border-slate-200 rounded-xl p-5">
+                    <h3 class="font-bold mb-2 text-slate-900">Why does my PDF upload fail even under the limit?</h3>
+                    <p class="text-slate-600 leading-relaxed">Common non-size causes: special characters in the filename, the wrong format, non-standard page dimensions, or password protection. Rename the file to plain letters and numbers, and unlock encrypted PDFs before uploading.</p>
+                </div>
+                <div class="border border-slate-200 rounded-xl p-5">
+                    <h3 class="font-bold mb-2 text-slate-900">Is it better to split or compress?</h3>
+                    <p class="text-slate-600 leading-relaxed">Compress first — it keeps everything in one file, which most portals prefer. Split when the file is enormous relative to the limit, when the portal accepts multiple uploads, or when compression alone would make pages unreadable.</p>
+                </div>
+                <div class="border border-slate-200 rounded-xl p-5">
+                    <h3 class="font-bold mb-2 text-slate-900">Do online compressors keep my file private?</h3>
+                    <p class="text-slate-600 leading-relaxed">Policies vary by tool, so check before uploading sensitive documents. getPDFpress processes files on secure servers and deletes them automatically after processing — see our privacy policy for details.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related tools -->
+        <section class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">Try the tools from this guide</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <a href="/compress-pdf-500kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+                    <span class="text-3xl">📄</span>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 500KB</div>
+                        <div class="text-sm text-slate-500">The most common portal limit.</div>
+                    </div>
+                </a>
+                <a href="/compress-pdf-200kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+                    <span class="text-3xl">📋</span>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 200KB</div>
+                        <div class="text-sm text-slate-500">For stricter upload limits.</div>
+                    </div>
+                </a>
+                <a href="/split-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+                    <span class="text-3xl">✂️</span>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Split PDF</div>
+                        <div class="text-sm text-slate-500">Break a big PDF into smaller parts.</div>
+                    </div>
+                </a>
+                <a href="/jpg-to-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+                    <span class="text-3xl">🖼️</span>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-blue-600">JPG to PDF</div>
+                        <div class="text-sm text-slate-500">Turn photos into a single PDF.</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <div class="mt-16 text-center p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
+            <h2 class="text-3xl font-bold mb-4">Ready to get under the limit?</h2>
+            <p class="text-lg text-slate-600 mb-8">getPDFpress is free, fast, and works on any device. No signup.</p>
+            <a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-bold hover:bg-blue-700 transition">Fix my upload →</a>
+        </div>
+    </article>
+
+    <footer class="bg-slate-900 text-white py-12 mt-20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="text-2xl font-black text-blue-400 mb-4">📄 getPDFpress</div>
+                    <p class="text-slate-400 text-sm">Free PDF tools. Built for mobile.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-3">Tools</h3>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/compress-pdf-500kb" class="hover:text-blue-400">Compress to 500KB</a></li>
+                        <li><a href="/compress-pdf-200kb" class="hover:text-blue-400">Compress to 200KB</a></li>
+                        <li><a href="/merge-pdf" class="hover:text-blue-400">Merge PDF</a></li>
+                        <li><a href="/split-pdf" class="hover:text-blue-400">Split PDF</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-3">Learn</h3>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/learn" class="hover:text-blue-400">All Guides</a></li>
+                        <li><a href="/learn/compress-pdf-for-job-application" class="hover:text-blue-400">Job Applications</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-3">Legal</h3>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/contact" class="hover:text-blue-400">Contact</a></li>
+                        <li><a href="/privacy" class="hover:text-blue-400">Privacy</a></li>
+                        <li><a href="/terms" class="hover:text-blue-400">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-400">
+                <p>© 2026 getPDFpress. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

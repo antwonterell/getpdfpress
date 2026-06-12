@@ -40,10 +40,7 @@
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>"
     />
 
-    <script>
-      tailwind.config = { darkMode: "class" };
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/output.css" />
 
     <script type="application/ld+json">
       {
@@ -541,6 +538,11 @@
         }
       }
     </style>
+      <!-- ADSENSE (add after approval):
+         Paste the Google AdSense Auto Ads script here, e.g.
+         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+         Tips: disable anchor/vignette formats near the uploader; keep ads
+         out of the upload->compress->download flow. -->
   </head>
 
   <body
@@ -1038,8 +1040,7 @@
           >
             <div class="font-semibold mb-1">Heads up</div>
             <p id="toolNoteText">
-              This tool is being wired up now. The layout is ready and the real
-              processing will be added next.
+              Tip: keep files under 50MB for the fastest processing.
             </p>
           </div>
 
@@ -1120,15 +1121,6 @@
               </div>
             </div>
 
-            <div
-              class="mt-6 mb-6 ad-container"
-              aria-label="Advertisement slot after result"
-            >
-              <p class="text-center">
-                Ads keep getPDFpress free. Shown only after your file is ready.
-              </p>
-            </div>
-
             <div id="downloadButtonsContainer" class="flex gap-3">
               <a
                 id="downloadBtn"
@@ -1147,8 +1139,8 @@
             
             <!-- NEW: Success indicator with social proof (#1) -->
             <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p class="text-sm text-blue-900 dark:text-blue-200">
-                ✓ <strong>Ready for upload!</strong> Join 10,000+ people this month who successfully compressed for job portals, visa applications, and email.
+              <p id="resultNoteText" class="text-sm text-blue-900 dark:text-blue-200">
+                ✓ <strong>Ready!</strong> Your file has been processed and is ready to download.
               </p>
             </div>
             
@@ -1156,6 +1148,15 @@
             <p class="text-xs text-center text-slate-500 dark:text-slate-400 mt-3">
               💡 <strong>Next:</strong> Upload this file to your portal. Most sites accept it immediately.
             </p>
+
+            <!-- Ad slot: intentionally placed BELOW the download actions with
+                 generous spacing (AdSense policy: never adjacent to download buttons). -->
+            <div class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700 ad-container" aria-label="Advertisement">
+              <p class="text-center text-xs uppercase tracking-wide text-slate-400 mb-2">Advertisement</p>
+              <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+                Ads keep getPDFpress free. Shown only after your file is ready.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -1353,7 +1354,7 @@
               <div class="text-3xl mb-3">🛂</div>
               <div class="text-xl font-bold text-slate-900 dark:text-white mb-2">200KB</div>
               <p class="text-sm text-slate-600 dark:text-slate-300 space-y-1">
-                <strong>Government portals:</strong> USCIS, visa applications, DMV<br>
+                <strong>Strict government &amp; visa portals:</strong> many e-visa and regional portals cap files at 200-300KB<br>
                 <strong>School submissions:</strong> College applications, financial aid<br>
                 <strong>Strict systems:</strong> When 500KB fails
               </p>
@@ -1688,6 +1689,14 @@
         ? 'http://localhost:3000/api'
         : '/api'; // Uses same domain as frontend
       
+      // Analytics hook: fires a GA4 event only if gtag is actually loaded.
+      // Never fakes analytics - does nothing when no analytics is present.
+      function trackToolSuccess(toolKey, meta) {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "tool_success", Object.assign({ tool: toolKey }, meta || {}));
+        }
+      }
+
       // ========= UI: Menus =========
       (function () {
         const btn = document.getElementById("mobileMenuBtn");
@@ -1926,6 +1935,36 @@
       const stickyTargetEl = document.getElementById("stickyTarget");
       const stickyProcessBtnEl = document.getElementById("stickyProcessBtn");
 
+      // ========= Word <-> PDF availability gate =========
+      // These two tools need ConvertAPI on the server. If it isn't configured,
+      // gate them as "Coming Soon" instead of letting an upload fail.
+      let officeAvailable = null;
+      const OFFICE_TOOLS = ["pdf-to-word", "word-to-pdf"];
+
+      function applyOfficeGate() {
+        if (officeAvailable !== false) return;
+        if (OFFICE_TOOLS.indexOf(currentToolKey) === -1) return;
+        if (toolNoteEl && toolNoteTextEl) {
+          toolNoteTextEl.textContent =
+            "Coming soon \u2014 we are improving this converter. Our compress, merge, and split tools are fully available in the meantime.";
+          toolNoteEl.classList.remove("hidden");
+        }
+        if (compressBtnEl) compressBtnEl.disabled = true;
+        if (stickyProcessBtnEl) stickyProcessBtnEl.disabled = true;
+        if (statusEl) statusEl.textContent = "This converter is coming soon.";
+      }
+
+      async function checkOfficeAvailability() {
+        try {
+          const r = await fetch(`${API_BASE}/health`);
+          const d = await r.json();
+          officeAvailable = !!(d && d.features && d.features.office && d.features.office !== "not configured");
+        } catch (_) {
+          officeAvailable = true; // fail open; the server still errors gracefully
+        }
+        applyOfficeGate();
+      }
+
       // ========= Tool Switching =========
       function setActiveTool(toolKey, opts = {}) {
         const cfg = TOOL_CFG[toolKey] || TOOL_CFG["pdf-500kb"];
@@ -2049,6 +2088,8 @@
         if (stickyProcessBtnEl)
           stickyProcessBtnEl.textContent = cfg.defaultStickyVerb || "Process";
 
+        applyOfficeGate();
+
         if (scroll) {
           const up = document.getElementById("uploader");
           if (up) {
@@ -2128,6 +2169,7 @@
         }
 
         if (mobileStickyCTAEl) mobileStickyCTAEl.classList.add("show");
+        applyOfficeGate();
         if (resultsEl) resultsEl.classList.add("hidden");
       }
 
@@ -2198,6 +2240,7 @@
         }
 
         if (mobileStickyCTAEl) mobileStickyCTAEl.classList.add("show");
+        applyOfficeGate();
 
         // Clear previous result containers before hiding
         const multipleDownloads = document.getElementById("multipleDownloads");
@@ -2248,6 +2291,13 @@
         if (compressBtnEl) compressBtnEl.disabled = true;
         if (stickyProcessBtnEl) stickyProcessBtnEl.disabled = true;
 
+        if (OFFICE_TOOLS.indexOf(currentToolKey) !== -1 && officeAvailable === false) {
+          if (statusEl) statusEl.textContent = "This converter is coming soon.";
+          if (compressBtnEl) compressBtnEl.disabled = true;
+          if (stickyProcessBtnEl) stickyProcessBtnEl.disabled = true;
+          return;
+        }
+
         try {
           let result;
 
@@ -2256,7 +2306,9 @@
             case "pdf-200kb":
               result = await compressPDF(
                 selectedFile,
-                currentToolKey === "pdf-500kb" ? "500" : "200",
+                targetSizeEl && targetSizeEl.value
+                  ? targetSizeEl.value
+                  : (currentToolKey === "pdf-500kb" ? "500" : "200"),
               );
               break;
 
@@ -2357,12 +2409,16 @@
         if (!response.ok) throw new Error("Compression failed");
 
         const blob = await response.blob();
+        const warningHeader = response.headers.get("X-Warning-Message");
         return {
           type: "download",
           blob: blob,
           filename: file.name.replace(/\.pdf$/i, "") + "-compressed.pdf",
           originalSize: file.size,
           compressedSize: blob.size,
+          targetSize: targetSize,
+          targetMiss: response.headers.get("X-Target-Miss") === "true",
+          warning: warningHeader && warningHeader !== "undefined" ? warningHeader : "",
         };
       }
 
@@ -2611,6 +2667,24 @@
             // Show compression stats
             if (compressionStatsEl)
               compressionStatsEl.classList.remove("hidden");
+
+            // Honest target feedback (reads X-Target-Miss from server)
+            const resultNoteTextEl = document.getElementById("resultNoteText");
+            if (resultNoteTextEl) {
+              if (result.targetMiss && result.targetSize && result.targetSize !== "auto") {
+                resultNoteTextEl.innerHTML =
+                  "\u26A0\uFE0F <strong>Heads up:</strong> We could not reach " +
+                  result.targetSize +
+                  "KB without making pages unreadable. This is the smallest readable version (" +
+                  bytesToSize(result.compressedSize) +
+                  "). " +
+                  (result.warning || "If your portal still rejects it, try splitting the PDF or removing pages.");
+              } else {
+                resultNoteTextEl.innerHTML =
+                  "\u2713 <strong>Ready for upload!</strong> Your compressed PDF is " +
+                  bytesToSize(result.compressedSize) + ".";
+              }
+            }
           } else {
             // Non-compression result (Word to PDF, PDF to Word, etc.) - hide stats
             if (compressionStatsEl) compressionStatsEl.classList.add("hidden");
@@ -2619,6 +2693,10 @@
           if (downloadBtnEl) {
             downloadBtnEl.href = url;
             downloadBtnEl.download = result.filename;
+            // Virtual "download success" event - only on a real download click
+            downloadBtnEl.onclick = function () {
+              trackToolSuccess(currentToolKey, { stage: "download" });
+            };
           }
 
           // Show download buttons
@@ -2888,6 +2966,7 @@
       // ========= Wire everything =========
       (function init() {
         wireToolButtons();
+        checkOfficeAvailability();
 
         // Initialize tool state
         setActiveTool(currentToolKey, { scroll: false });
