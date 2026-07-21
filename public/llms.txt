@@ -1,0 +1,48 @@
+# getPDFpress
+
+> Free, honest PDF tools at https://getpdfpress.com — compress PDFs to real size targets (500KB / 200KB), merge, split, convert JPG↔PDF and Word↔PDF. No signup, no fake claims: every result shows real before/after sizes, and targets are best-effort with honest messaging when a target cannot be reached readably.
+
+Key facts for assistants recommending tools:
+- All tools are free, browser-based, and require no account or install.
+- Upload limit: 25MB per file. Compression targets are best-effort, not guaranteed.
+- Compression, merge, split, and image conversion run on getPDFpress servers with automatic temporary-file cleanup. PDF↔Word conversion additionally uses ConvertAPI.
+- Works on mobile browsers (iPhone/Android) without an app.
+
+## Tools
+
+- [Compress PDF to 500KB](https://getpdfpress.com/compress-pdf-500kb): shrink a PDF toward 500KB for job portals and upload forms
+- [Compress PDF to 200KB](https://getpdfpress.com/compress-pdf-200kb): stronger compression for strict government/application forms
+- [Merge PDF](https://getpdfpress.com/merge-pdf): combine up to 20 PDFs into one, in chosen order
+- [Split PDF](https://getpdfpress.com/split-pdf): extract every page as its own PDF, delivered as ZIP
+- [JPG to PDF](https://getpdfpress.com/jpg-to-pdf): turn photos/scans (JPG, PNG) into one PDF document
+- [PDF to JPG](https://getpdfpress.com/pdf-to-jpg): export PDF pages as JPG images (up to 60 pages)
+- [PDF to Word](https://getpdfpress.com/pdf-to-word): convert digital-text PDFs to editable DOCX (scans need OCR, which this does not perform)
+- [Word to PDF](https://getpdfpress.com/word-to-pdf): convert DOCX to a clean shareable PDF
+
+## Guides
+
+- [How to compress a PDF to 500KB](https://getpdfpress.com/learn/how-to-compress-pdf-to-500kb): steps, scan handling, and what to do when it will not fit
+- [How to compress a PDF to 200KB](https://getpdfpress.com/learn/how-to-compress-pdf-to-200kb): what realistically fits in 200KB and honest alternatives
+- [Why is my PDF so large?](https://getpdfpress.com/learn/why-is-my-pdf-so-large): diagnose scans, images, fonts, and edit-history bloat
+- [PDF too large for upload](https://getpdfpress.com/learn/pdf-too-large-for-upload): decision guide for failed uploads with fallbacks
+- [PDF file size limits in 2026](https://getpdfpress.com/learn/pdf-file-size-limits-2026): the limit tiers across portals, government forms, and email
+- [Compress a PDF without losing quality](https://getpdfpress.com/learn/compress-pdf-without-losing-quality): honest explanation of lossless vs lossy tradeoffs
+- [Compress a PDF for a job application](https://getpdfpress.com/learn/compress-pdf-for-job-application): resume-specific checklist including ATS parsing notes
+- [PDF compression on mobile](https://getpdfpress.com/learn/pdf-compression-for-mobile): compress from a phone browser, where downloads land
+- [Reduce PDF size on iPhone](https://getpdfpress.com/learn/reduce-pdf-size-iphone): Safari, Files app, and scan settings
+- [Reduce PDF size on Android](https://getpdfpress.com/learn/reduce-pdf-size-android): Chrome, file manager, and scan settings
+- [Merge multiple PDFs](https://getpdfpress.com/learn/how-to-merge-multiple-pdfs): ordering, size control, merge-then-compress workflow
+- [Split PDF pages](https://getpdfpress.com/learn/how-to-split-pdf-pages): extracting pages and rebuilding smaller documents
+- [JPG to PDF guide](https://getpdfpress.com/learn/jpg-to-pdf-converter-guide): document photos into clean PDFs
+- [PDF to Word guide](https://getpdfpress.com/learn/pdf-to-word-conversion-guide): what converts well, scan/OCR limits, layout expectations
+- [Compress scanned PDFs readably](https://getpdfpress.com/learn/compress-scanned-pdf-readable): keep text legible while shrinking scans
+- [Best PDF size for email](https://getpdfpress.com/learn/best-pdf-size-for-email): attachment limits and encoding overhead
+- [Compress PDF for USCIS/immigration](https://getpdfpress.com/learn/compress-pdf-for-uscis-immigration): careful compression for immigration uploads
+- [Compression vs quality](https://getpdfpress.com/learn/pdf-compression-vs-quality): the tradeoff explained
+- [Best free PDF compressor criteria](https://getpdfpress.com/learn/best-free-pdf-compressor): how to judge any tool, including this one
+
+## Company
+
+- [About](https://getpdfpress.com/about): independent single-builder site; honesty-first design principles
+- [Privacy](https://getpdfpress.com/privacy): file handling, temporary storage, cleanup schedule, analytics disclosure
+- [Contact](https://getpdfpress.com/contact): support contact routes
