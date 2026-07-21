@@ -15,6 +15,7 @@ const axios = require("axios");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.disable("x-powered-by");
 
 // ============================================
 // PRODUCTION CONFIGURATION
@@ -165,7 +166,9 @@ const upload = multer({
 // ============================================
 app.use(
   cors({
-    origin: "*",
+    // Same-origin requests bypass CORS entirely; this only stops other
+    // websites from calling our processing API from their visitors' browsers.
+    origin: ["https://getpdfpress.com", "http://localhost:3000", "http://localhost:3456"],
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   }),
@@ -176,8 +179,91 @@ app.use(express.json({ limit: '10mb' }));
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=15552000; includeSubDomains");
+  }
   next();
 });
+
+// ============================================
+// RATE LIMITING (in-memory, per client IP)
+// ============================================
+const rateBuckets = new Map();
+function rateLimit(max, windowMs, label) {
+  return (req, res, next) => {
+    const ip = req.headers["cf-connecting-ip"] || req.socket.remoteAddress || "unknown";
+    const key = `${label}:${ip}`;
+    const now = Date.now();
+    let bucket = rateBuckets.get(key);
+    if (!bucket || now - bucket.start > windowMs) {
+      bucket = { start: now, count: 0 };
+      rateBuckets.set(key, bucket);
+    }
+    bucket.count++;
+    if (bucket.count > max) {
+      return res.status(429).json({
+        error: "Too many requests",
+        message: "You have reached the usage limit. Please wait a few minutes and try again.",
+      });
+    }
+    next();
+  };
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of rateBuckets) {
+    if (now - bucket.start > 30 * 60 * 1000) rateBuckets.delete(key);
+  }
+}, 10 * 60 * 1000);
+
+// Processing endpoints: generous for humans, hostile to scripts.
+app.use("/api/", rateLimit(60, 10 * 60 * 1000, "api"));
+// ConvertAPI-backed conversions burn paid quota: stricter.
+app.use("/api/word-to-pdf", rateLimit(10, 10 * 60 * 1000, "convert"));
+app.use("/api/pdf-to-word", rateLimit(10, 10 * 60 * 1000, "convert"));
+
+// ============================================
+// UPLOAD CONTENT VALIDATION (magic bytes, not just filenames)
+// ============================================
+async function fileStartsWith(filePath, signatures) {
+  let handle;
+  try {
+    handle = await fs.open(filePath, "r");
+    const { buffer } = await handle.read(Buffer.alloc(1024), 0, 1024, 0);
+    return signatures.some((sig) => buffer.includes(sig));
+  } catch (_) {
+    return false;
+  } finally {
+    if (handle) await handle.close();
+  }
+}
+const isRealPdf = (p) => fileStartsWith(p, [Buffer.from("%PDF-")]);
+const isRealImage = (p) => fileStartsWith(p, [Buffer.from([0xff, 0xd8, 0xff]), Buffer.from([0x89, 0x50, 0x4e, 0x47])]);
+const isRealOffice = (p) => fileStartsWith(p, [Buffer.from([0x50, 0x4b, 0x03, 0x04]), Buffer.from([0xd0, 0xcf, 0x11, 0xe0])]);
+
+function requireFileType(checker, label) {
+  return async (req, res, next) => {
+    const files = req.files || (req.file ? [req.file] : []);
+    for (const f of files) {
+      if (!(await checker(f.path))) {
+        await cleanupFiles(...files.map((x) => x.path));
+        return res.status(400).json({
+          error: "Wrong file type",
+          message: `${headerSafeName(f.originalname)} is not a valid ${label} file. Please upload a real ${label}.`,
+        });
+      }
+    }
+    next();
+  };
+}
+const requirePdf = () => requireFileType(isRealPdf, "PDF");
+const requireImages = () => requireFileType(isRealImage, "JPG or PNG image");
+const requireOffice = () => requireFileType(isRealOffice, "Word document");
+
+// Filenames echoed into headers must never carry header-breaking characters.
+const headerSafeName = (name) => String(name || "file").replace(/[\r\n"'\\;]/g, "_").slice(0, 120);
 
 // Canonical domain enforcement only in production.
 // This keeps local development on http://localhost:3000 from redirecting to https://localhost.
@@ -355,7 +441,7 @@ async function cleanupFiles(...filePaths) {
 // ============================================
 // PDF COMPRESSION - Smart compression with fallback
 // ============================================
-app.post("/api/compress", upload.single("file"), async (req, res) => {
+app.post("/api/compress", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath;
 
   try {
@@ -583,7 +669,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
       
       res.set({
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+        "Content-Disposition": `attachment; filename="compressed-${headerSafeName(originalFilename)}"`,
         "Content-Length": compressedBytes.length,
         "X-Original-Size": originalSize,
         "X-Compressed-Size": compressedBytes.length,
@@ -619,7 +705,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
           
           res.set({
             "Content-Type": "application/pdf",
-            "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+            "Content-Disposition": `attachment; filename="compressed-${headerSafeName(originalFilename)}"`,
             "Content-Length": method2Result.length,
             "X-Original-Size": originalSize,
             "X-Compressed-Size": method2Result.length,
@@ -648,7 +734,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
         
         res.set({
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+          "Content-Disposition": `attachment; filename="compressed-${headerSafeName(originalFilename)}"`,
           "Content-Length": imageResult.bytes.length,
           "X-Original-Size": originalSize,
           "X-Compressed-Size": imageResult.bytes.length,
@@ -690,7 +776,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     console.log(`↩️ All methods produced larger files - returning the original (${originalSizeKB}KB)`);
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+      "Content-Disposition": `attachment; filename="compressed-${headerSafeName(originalFilename)}"`,
       "Content-Length": originalBytes.length,
       "X-Original-Size": originalSize,
       "X-Compressed-Size": originalBytes.length,
@@ -716,7 +802,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
   
   const finalHeaders = {
     "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+    "Content-Disposition": `attachment; filename="compressed-${headerSafeName(originalFilename)}"`,
     "Content-Length": bestResult.bytes.length,
     "X-Original-Size": originalSize,
     "X-Compressed-Size": bestResult.bytes.length,
@@ -867,7 +953,7 @@ async function compressWithConvertAPI(req, res, inputPath, quality = 60) {
 
       res.set({
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
+        "Content-Disposition": `attachment; filename="compressed-${headerSafeName(req.file.originalname)}"`,
         "Content-Length": pdfBytes.length,
         "X-Original-Size": req.file.size,
         "X-Compressed-Size": pdfBytes.length,
@@ -915,7 +1001,7 @@ async function basicCompress(req, res, inputPath) {
     console.log(`↩️ Optimization would grow the file (${compressedSizeKB}KB > ${originalSizeKB}KB) - returning original`);
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
+      "Content-Disposition": `attachment; filename="compressed-${headerSafeName(req.file.originalname)}"`,
       "Content-Length": originalBytes.length,
       "X-Original-Size": req.file.size,
       "X-Compressed-Size": originalBytes.length,
@@ -929,7 +1015,7 @@ async function basicCompress(req, res, inputPath) {
 
   res.set({
     "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
+    "Content-Disposition": `attachment; filename="compressed-${headerSafeName(req.file.originalname)}"`,
     "Content-Length": compressedBytes.length,
     "X-Original-Size": req.file.size,
     "X-Compressed-Size": compressedBytes.length,
@@ -941,7 +1027,7 @@ async function basicCompress(req, res, inputPath) {
 // ============================================
 // MERGE PDFs - Native pdf-lib
 // ============================================
-app.post("/api/merge", upload.array("files", 20), async (req, res) => {
+app.post("/api/merge", upload.array("files", 20), requirePdf(), async (req, res) => {
   let inputPaths = [];
   let outputPath;
 
@@ -992,7 +1078,7 @@ app.post("/api/merge", upload.array("files", 20), async (req, res) => {
 // ============================================
 // SPLIT PDF - Native pdf-lib + archiver
 // ============================================
-app.post("/api/split", upload.single("file"), async (req, res) => {
+app.post("/api/split", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath, outputPaths = [];
   const archiver = require('archiver');
 
@@ -1065,7 +1151,7 @@ app.post("/api/split", upload.single("file"), async (req, res) => {
 // ============================================
 // PDF TO IMAGES
 // ============================================
-app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
+app.post("/api/pdf-to-images", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath, outputPaths = [];
   const archiver = require('archiver');
 
@@ -1158,7 +1244,7 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
 });
 
 // NEW ENDPOINT: Download single image by page number
-app.post("/api/pdf-to-images-download", upload.single("file"), async (req, res) => {
+app.post("/api/pdf-to-images-download", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath, outputPath;
 
   try {
@@ -1214,7 +1300,7 @@ app.post("/api/pdf-to-images-download", upload.single("file"), async (req, res) 
 });
 
 // NEW ENDPOINT: Download all images as ZIP
-app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
+app.post("/api/pdf-to-images-zip", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath, outputPaths = [];
   const archiver = require('archiver');
 
@@ -1295,7 +1381,7 @@ app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
 // ============================================
 // IMAGES TO PDF - Native pdf-lib + Sharp
 // ============================================
-app.post("/api/images-to-pdf", upload.array("files", 50), async (req, res) => {
+app.post("/api/images-to-pdf", upload.array("files", 50), requireImages(), async (req, res) => {
   let inputPaths = [];
   let outputPath;
 
@@ -1370,7 +1456,7 @@ function convertApiFriendlyError(error) {
 // ============================================
 // WORD TO PDF - ConvertAPI
 // ============================================
-app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
+app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req, res) => {
   let inputPath;
 
   try {
@@ -1442,7 +1528,7 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
 
       res.set({
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${path.basename(req.file.originalname, path.extname(req.file.originalname))}.pdf"`,
+        "Content-Disposition": `attachment; filename="${headerSafeName(path.basename(req.file.originalname, path.extname(req.file.originalname)))}.pdf"`,
         "Content-Length": pdfBytes.length,
       });
 
@@ -1470,7 +1556,7 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
 // ============================================
 // PDF TO WORD - ConvertAPI
 // ============================================
-app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
+app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, res) => {
   let inputPath;
 
   try {
@@ -1541,7 +1627,7 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
 
       res.set({
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${path.basename(req.file.originalname, '.pdf')}.docx"`,
+        "Content-Disposition": `attachment; filename="${headerSafeName(path.basename(req.file.originalname, '.pdf'))}.docx"`,
         "Content-Length": docxBytes.length,
       });
 

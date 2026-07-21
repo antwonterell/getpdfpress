@@ -1,221 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compress a Scanned PDF Without Making It Unreadable | getPDFpress Learning Center</title>
-    <meta name="description" content="Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.">
-    <meta name="author" content="getPDFpress">
-    <link rel="canonical" href="https://getpdfpress.com/learn/compress-scanned-pdf-readable">
-    <meta property="og:title" content="Compress a Scanned PDF Without Making It Unreadable">
-    <meta property="og:description" content="Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://getpdfpress.com/learn/compress-scanned-pdf-readable">
-    <meta property="og:image" content="https://getpdfpress.com/og-pdfpress.png">
-    <link rel="stylesheet" href="/tailwind.css?v=20260722c" />
-    <!-- ADSENSE (add after approval): paste the AdSense Auto Ads <script> here. -->
-    <style>
-        .article-content h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #0f172a; }
-        .article-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1e293b; }
-        .article-content p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
-        .article-content ul, .article-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
-        .article-content ol { list-style: decimal; }
-        .article-content ul { list-style: disc; }
-        .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
-    </style>
-    <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Compress a Scanned PDF Without Making It Unreadable", "description": "Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.", "author": {"@type": "Organization", "name": "getPDFpress"}, "publisher": {"@type": "Organization", "name": "getPDFpress", "url": "https://getpdfpress.com"}, "mainEntityOfPage": "https://getpdfpress.com/learn/compress-scanned-pdf-readable", "dateModified": "2026-06-11"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why does my scanned PDF barely compress?", "acceptedAnswer": {"@type": "Answer", "text": "It may already be optimized \u2014 previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos."}}, {"@type": "Question", "name": "What DPI should I scan documents at?", "acceptedAnswer": {"@type": "Answer", "text": "300 DPI is the safe standard; 150\u2013200 DPI is usually still readable and much smaller. Going above 300 DPI for ordinary documents mostly adds file size, not useful detail."}}, {"@type": "Question", "name": "Is black-and-white scanning a good idea?", "acceptedAnswer": {"@type": "Answer", "text": "Sometimes. Pure black-and-white (1-bit) produces tiny files and crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default."}}, {"@type": "Question", "name": "Can OCR reduce my scan's file size?", "acceptedAnswer": {"@type": "Answer", "text": "OCR adds a text layer for searchability; by itself it doesn't shrink the images. Some OCR tools re-encode images during processing, which can reduce size, but treat OCR as a readability feature, not a compression method."}}]}]}</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compress a Scanned PDF Without Making It Unreadable | getPDFpress Learning Center</title>
+  <meta name="description" content="Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.">
+  <meta name="author" content="getPDFpress">
+  <link rel="canonical" href="https://getpdfpress.com/learn/compress-scanned-pdf-readable">
+  <meta property="og:title" content="Compress a Scanned PDF Without Making It Unreadable">
+  <meta property="og:description" content="Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://getpdfpress.com/learn/compress-scanned-pdf-readable">
+  <meta property="og:image" content="https://getpdfpress.com/og-pdfpress.png">
+  <link rel="stylesheet" href="/tailwind.css?v=20260722c" />
+  <!-- ADSENSE (add after approval): paste the AdSense Auto Ads <script> here. -->
+  <style>
+    .article-content h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #0f172a; }
+    .article-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1e293b; }
+    .article-content p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
+    .article-content ul, .article-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+    .article-content ol { list-style: decimal; }
+    .article-content ul { list-style: disc; }
+    .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
+  </style>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Compress a Scanned PDF Without Making It Unreadable", "description": "Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.", "author": {"@type": "Organization", "name": "getPDFpress"}, "publisher": {"@type": "Organization", "name": "getPDFpress", "url": "https://getpdfpress.com"}, "mainEntityOfPage": "https://getpdfpress.com/learn/compress-scanned-pdf-readable", "dateModified": "2026-06-11"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why does my scanned PDF barely compress?", "acceptedAnswer": {"@type": "Answer", "text": "It may already be optimized \u2014 previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos."}}, {"@type": "Question", "name": "What DPI should I scan documents at?", "acceptedAnswer": {"@type": "Answer", "text": "300 DPI is the safe standard; 150\u2013200 DPI is usually still readable and much smaller. Going above 300 DPI for ordinary documents mostly adds file size, not useful detail."}}, {"@type": "Question", "name": "Is black-and-white scanning a good idea?", "acceptedAnswer": {"@type": "Answer", "text": "Sometimes. Pure black-and-white (1-bit) produces tiny files and crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default."}}, {"@type": "Question", "name": "Can OCR reduce my scan's file size?", "acceptedAnswer": {"@type": "Answer", "text": "OCR adds a text layer for searchability; by itself it doesn't shrink the images. Some OCR tools re-encode images during processing, which can reduce size, but treat OCR as a readability feature, not a compression method."}}]}]}</script>
 <script src="/ga.js?v=20260722c" defer></script></head>
 <body class="bg-white text-slate-900">
-    <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-black text-blue-600 flex items-center gap-2">
-                <span>📄</span> getPDFpress
-            </a>
-            <div class="flex space-x-4 md:space-x-6 text-sm font-semibold text-slate-600">
-                <a href="/" class="hover:text-blue-600 transition">Tools</a>
-                <a href="/learn" class="text-blue-600">Learn</a>
-                <a href="/contact" class="hover:text-blue-600 transition">Contact</a>
-            </div>
-        </div>
-    </nav>
+  <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-black text-blue-600 flex items-center gap-2">
+        <span>📄</span> getPDFpress
+      </a>
+      <div class="flex space-x-4 md:space-x-6 text-sm font-semibold text-slate-600">
+        <a href="/" class="hover:text-blue-600 transition">Tools</a>
+        <a href="/learn" class="text-blue-600">Learn</a>
+        <a href="/contact" class="hover:text-blue-600 transition">Contact</a>
+      </div>
+    </div>
+  </nav>
 
-    <div class="bg-slate-50 border-b border-slate-200 py-3">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6">
-            <nav class="flex text-sm text-slate-600">
-                <a href="/" class="hover:text-blue-600">Home</a>
-                <span class="mx-2">/</span>
-                <a href="/learn" class="hover:text-blue-600">Learn</a>
-                <span class="mx-2">/</span>
-                <span class="text-slate-900 font-semibold">Compress Scanned PDFs</span>
-            </nav>
+  <div class="bg-slate-50 border-b border-slate-200 py-3">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+      <nav class="flex text-sm text-slate-600">
+        <a href="/" class="hover:text-blue-600">Home</a>
+        <span class="mx-2">/</span>
+        <a href="/learn" class="hover:text-blue-600">Learn</a>
+        <span class="mx-2">/</span>
+        <span class="text-slate-900 font-semibold">Compress Scanned PDFs</span>
+      </nav>
+    </div>
+  </div>
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <header class="mb-10">
+      <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full">SCANNING</span>
+      <h1 class="text-4xl md:text-5xl font-extrabold mt-4 mb-6">How to Compress a Scanned PDF Without Making It Unreadable</h1>
+      <div class="flex items-center gap-4 text-sm text-slate-600 pb-6 border-b">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">📄</div>
+          <div>
+            <div class="font-semibold text-slate-900">getPDFpress Team</div>
+            <div class="text-xs">PDF tools &amp; guides</div>
+          </div>
         </div>
+        <span class="text-slate-300">•</span>
+        <time datetime="2026-06-11">Updated June 11, 2026</time>
+      </div>
+    </header>
+
+    <!-- Quick answer -->
+    <div class="bg-blue-50 border-l-4 border-blue-600 rounded-r-xl p-6 mb-10">
+      <h2 class="font-bold text-lg mb-2 text-slate-900">Quick answer</h2>
+      <p class="text-slate-700 leading-relaxed">Scans are photos of paper, so they compress like photos: quality trades off against size. The recipe that preserves readability: scan (or keep) <strong>grayscale at 150–300 DPI</strong>, compress with a <strong>gentle setting first</strong>, and always inspect signatures and fine print at 150% zoom before submitting. If you must hit a very small target like 200KB, reduce pages or re-scan rather than crushing quality.</p>
     </div>
 
-    <article class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-        <header class="mb-10">
-            <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full">SCANNING</span>
-            <h1 class="text-4xl md:text-5xl font-extrabold mt-4 mb-6">How to Compress a Scanned PDF Without Making It Unreadable</h1>
-            <div class="flex items-center gap-4 text-sm text-slate-600 pb-6 border-b">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">📄</div>
-                    <div>
-                        <div class="font-semibold text-slate-900">getPDFpress Team</div>
-                        <div class="text-xs">PDF tools &amp; guides</div>
-                    </div>
-                </div>
-                <span class="text-slate-300">•</span>
-                <time datetime="2026-06-11">Updated June 11, 2026</time>
-            </div>
-        </header>
+    <!-- Table of contents -->
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10">
+      <h2 class="font-bold mb-3 text-slate-900">In this guide</h2>
+      <ol class="space-y-1 text-sm list-decimal pl-5">
+        <li><a href="#why" class="text-blue-600 hover:underline">Why scanned PDFs behave differently</a></li>
+        <li><a href="#sweet-spot" class="text-blue-600 hover:underline">The readability sweet spot: DPI, color, quality</a></li>
+        <li><a href="#workflow" class="text-blue-600 hover:underline">A safe compression workflow</a></li>
+        <li><a href="#rescue" class="text-blue-600 hover:underline">Rescuing a scan that won&#x27;t compress</a></li>
+        <li><a href="#verify" class="text-blue-600 hover:underline">How to verify readability before submitting</a></li>
+      </ol>
+    </div>
 
-        <!-- Quick answer -->
-        <div class="bg-blue-50 border-l-4 border-blue-600 rounded-r-xl p-6 mb-10">
-            <h2 class="font-bold text-lg mb-2 text-slate-900">Quick answer</h2>
-            <p class="text-slate-700 leading-relaxed">Scans are photos of paper, so they compress like photos: quality trades off against size. The recipe that preserves readability: scan (or keep) <strong>grayscale at 150–300 DPI</strong>, compress with a <strong>gentle setting first</strong>, and always inspect signatures and fine print at 150% zoom before submitting. If you must hit a very small target like 200KB, reduce pages or re-scan rather than crushing quality.</p>
-        </div>
+    <div class="article-content">
 
-        <!-- Table of contents -->
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10">
-            <h2 class="font-bold mb-3 text-slate-900">In this guide</h2>
-            <ol class="space-y-1 text-sm list-decimal pl-5">
-                <li><a href="#why" class="text-blue-600 hover:underline">Why scanned PDFs behave differently</a></li>
-                <li><a href="#sweet-spot" class="text-blue-600 hover:underline">The readability sweet spot: DPI, color, quality</a></li>
-                <li><a href="#workflow" class="text-blue-600 hover:underline">A safe compression workflow</a></li>
-                <li><a href="#rescue" class="text-blue-600 hover:underline">Rescuing a scan that won&#x27;t compress</a></li>
-                <li><a href="#verify" class="text-blue-600 hover:underline">How to verify readability before submitting</a></li>
-            </ol>
-        </div>
+      <h2 id="why">Why scanned PDFs behave differently</h2>
+      <p>A digitally created PDF stores text as text - tiny, infinitely sharp, and almost free to compress. A scanned PDF stores each page as a picture. Every compression decision is therefore an image-quality decision: push too hard and letters smear, stamps blur, and signatures turn to mush.</p>
+      <p>This is why a 3-page scan can be 6MB while a 300-page ebook is 2MB. It's also why "compress to 200KB" is easy for a contract typed in Word and genuinely hard for the same contract scanned in color at 600 DPI.</p>
 
-        <div class="article-content">
+      <h2 id="sweet-spot">The readability sweet spot: DPI, color, quality</h2>
+      <ul>
+        <li><strong>DPI:</strong> 300 DPI is the common standard for document scanning; 150–200 DPI is usually still perfectly readable and roughly 2–4× smaller. Below ~120 DPI, small print degrades quickly.</li>
+        <li><strong>Color:</strong> Grayscale cuts size to roughly a third of color. Black-and-white (1-bit) is smaller still but can destroy pencil marks and light stamps - test first.</li>
+        <li><strong>JPEG quality:</strong> The invisible dial inside most compressors. Down to moderate quality, text stays readable; at very low quality you'll see blocky artifacts around letters.</li>
+      </ul>
 
-            <h2 id="why">Why scanned PDFs behave differently</h2>
-            <p>A digitally created PDF stores text as text — tiny, infinitely sharp, and almost free to compress. A scanned PDF stores each page as a picture. Every compression decision is therefore an image-quality decision: push too hard and letters smear, stamps blur, and signatures turn to mush.</p>
-            <p>This is why a 3-page scan can be 6MB while a 300-page ebook is 2MB. It's also why "compress to 200KB" is easy for a contract typed in Word and genuinely hard for the same contract scanned in color at 600 DPI.</p>
+      <h2 id="workflow">A safe compression workflow</h2>
+      <ol>
+        <li>Upload to the <a href="/compress-pdf-500kb" class="text-blue-600 hover:underline">compressor</a> and choose your portal's target.</li>
+        <li>Start with the <strong>Gentle</strong> level. If the result hits your target - done, you kept maximum quality.</li>
+        <li>If it misses, step down to <strong>Balanced</strong>, then <strong>Strong</strong>. The tool tells you honestly when a target can't be reached at readable quality.</li>
+        <li>If even Strong misses, the target is too aggressive for that page count - <a href="/split-pdf" class="text-blue-600 hover:underline">split the document</a> or remove non-essential pages, then compress the smaller piece.</li>
+      </ol>
 
-            <h2 id="sweet-spot">The readability sweet spot: DPI, color, quality</h2>
-            <ul>
-                <li><strong>DPI:</strong> 300 DPI is the common standard for document scanning; 150–200 DPI is usually still perfectly readable and roughly 2–4× smaller. Below ~120 DPI, small print degrades quickly.</li>
-                <li><strong>Color:</strong> Grayscale cuts size to roughly a third of color. Black-and-white (1-bit) is smaller still but can destroy pencil marks and light stamps — test first.</li>
-                <li><strong>JPEG quality:</strong> The invisible dial inside most compressors. Down to moderate quality, text stays readable; at very low quality you'll see blocky artifacts around letters.</li>
-            </ul>
+      <h2 id="rescue">Rescuing a scan that won't compress</h2>
+      <p>Some scans arrive broken: skewed, low-contrast phone photos at odd angles. If compression keeps failing, fix the source instead. Re-scan flat on a scanner (or with a scanning app that de-skews), choose grayscale, 150–200 DPI. If you only have a paper copy and a phone, take photos in bright, even light, directly overhead - then convert with <a href="/jpg-to-pdf" class="text-blue-600 hover:underline">JPG to PDF</a>, which also optimizes the images.</p>
 
-            <h2 id="workflow">A safe compression workflow</h2>
-            <ol>
-                <li>Upload to the <a href="/compress-pdf-500kb" class="text-blue-600 hover:underline">compressor</a> and choose your portal's target.</li>
-                <li>Start with the <strong>Gentle</strong> level. If the result hits your target — done, you kept maximum quality.</li>
-                <li>If it misses, step down to <strong>Balanced</strong>, then <strong>Strong</strong>. The tool tells you honestly when a target can't be reached at readable quality.</li>
-                <li>If even Strong misses, the target is too aggressive for that page count — <a href="/split-pdf" class="text-blue-600 hover:underline">split the document</a> or remove non-essential pages, then compress the smaller piece.</li>
-            </ol>
-
-            <h2 id="rescue">Rescuing a scan that won't compress</h2>
-            <p>Some scans arrive broken: skewed, low-contrast phone photos at odd angles. If compression keeps failing, fix the source instead. Re-scan flat on a scanner (or with a scanning app that de-skews), choose grayscale, 150–200 DPI. If you only have a paper copy and a phone, take photos in bright, even light, directly overhead — then convert with <a href="/jpg-to-pdf" class="text-blue-600 hover:underline">JPG to PDF</a>, which also optimizes the images.</p>
-
-            <h2 id="verify">How to verify readability before submitting</h2>
-            <p>Open the compressed PDF and zoom to 150%. Check the smallest text on the page, every signature, every stamp or seal, and any handwriting. If you have to squint, the reviewer will too — and for government or legal submissions, an unreadable document can mean rejection or a request to resubmit. When in doubt, choose the bigger, clearer file and split the document to meet the limit.</p>
+      <h2 id="verify">How to verify readability before submitting</h2>
+      <p>Open the compressed PDF and zoom to 150%. Check the smallest text on the page, every signature, every stamp or seal, and any handwriting. If you have to squint, the reviewer will too - and for government or legal submissions, an unreadable document can mean rejection or a request to resubmit. When in doubt, choose the bigger, clearer file and split the document to meet the limit.</p>
  
+    </div>
+
+    <!-- FAQs -->
+    <section class="mt-12">
+      <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
+      <div class="space-y-5">
+        <div class="border border-slate-200 rounded-xl p-5">
+          <h3 class="font-bold mb-2 text-slate-900">Why does my scanned PDF barely compress?</h3>
+          <p class="text-slate-600 leading-relaxed">It may already be optimized - previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos.</p>
         </div>
-
-        <!-- FAQs -->
-        <section class="mt-12">
-            <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
-            <div class="space-y-5">
-                <div class="border border-slate-200 rounded-xl p-5">
-                    <h3 class="font-bold mb-2 text-slate-900">Why does my scanned PDF barely compress?</h3>
-                    <p class="text-slate-600 leading-relaxed">It may already be optimized — previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos.</p>
-                </div>
-                <div class="border border-slate-200 rounded-xl p-5">
-                    <h3 class="font-bold mb-2 text-slate-900">What DPI should I scan documents at?</h3>
-                    <p class="text-slate-600 leading-relaxed">300 DPI is the safe standard; 150–200 DPI is usually still readable and much smaller. Going above 300 DPI for ordinary documents mostly adds file size, not useful detail.</p>
-                </div>
-                <div class="border border-slate-200 rounded-xl p-5">
-                    <h3 class="font-bold mb-2 text-slate-900">Is black-and-white scanning a good idea?</h3>
-                    <p class="text-slate-600 leading-relaxed">Sometimes. Pure black-and-white (1-bit) produces tiny files and crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default.</p>
-                </div>
-                <div class="border border-slate-200 rounded-xl p-5">
-                    <h3 class="font-bold mb-2 text-slate-900">Can OCR reduce my scan&#x27;s file size?</h3>
-                    <p class="text-slate-600 leading-relaxed">OCR adds a text layer for searchability; by itself it doesn't shrink the images. Some OCR tools re-encode images during processing, which can reduce size, but treat OCR as a readability feature, not a compression method.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Related tools -->
-        <section class="mt-12">
-            <h2 class="text-2xl font-bold mb-6">Try the tools from this guide</h2>
-            <div class="grid sm:grid-cols-2 gap-4">
-                <a href="/compress-pdf-500kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
-                    <span class="text-3xl">📄</span>
-                    <div>
-                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 500KB</div>
-                        <div class="text-sm text-slate-500">The most common portal limit.</div>
-                    </div>
-                </a>
-                <a href="/compress-pdf-200kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
-                    <span class="text-3xl">📋</span>
-                    <div>
-                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 200KB</div>
-                        <div class="text-sm text-slate-500">For stricter upload limits.</div>
-                    </div>
-                </a>
-                <a href="/jpg-to-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
-                    <span class="text-3xl">🖼️</span>
-                    <div>
-                        <div class="font-bold text-slate-900 group-hover:text-blue-600">JPG to PDF</div>
-                        <div class="text-sm text-slate-500">Turn photos into a single PDF.</div>
-                    </div>
-                </a>
-                <a href="/split-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
-                    <span class="text-3xl">✂️</span>
-                    <div>
-                        <div class="font-bold text-slate-900 group-hover:text-blue-600">Split PDF</div>
-                        <div class="text-sm text-slate-500">Break a big PDF into smaller parts.</div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <div class="mt-16 text-center p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
-            <h2 class="text-3xl font-bold mb-4">Ready to get under the limit?</h2>
-            <p class="text-lg text-slate-600 mb-8">getPDFpress is free, fast, and works on any device. No signup.</p>
-            <a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-bold hover:bg-blue-700 transition">Compress my scan →</a>
+        <div class="border border-slate-200 rounded-xl p-5">
+          <h3 class="font-bold mb-2 text-slate-900">What DPI should I scan documents at?</h3>
+          <p class="text-slate-600 leading-relaxed">300 DPI is the safe standard; 150–200 DPI is usually still readable and much smaller. Going above 300 DPI for ordinary documents mostly adds file size, not useful detail.</p>
         </div>
-    </article>
-
-    <footer class="bg-slate-900 text-white py-12 mt-20">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="text-2xl font-black text-blue-400 mb-4">📄 getPDFpress</div>
-                    <p class="text-slate-400 text-sm">Free PDF tools. Built for mobile.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-3">Tools</h3>
-                    <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="/compress-pdf-500kb" class="hover:text-blue-400">Compress to 500KB</a></li>
-                        <li><a href="/compress-pdf-200kb" class="hover:text-blue-400">Compress to 200KB</a></li>
-                        <li><a href="/merge-pdf" class="hover:text-blue-400">Merge PDF</a></li>
-                        <li><a href="/split-pdf" class="hover:text-blue-400">Split PDF</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-3">Learn</h3>
-                    <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="/learn" class="hover:text-blue-400">All Guides</a></li>
-                        <li><a href="/learn/compress-pdf-for-job-application" class="hover:text-blue-400">Job Applications</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-3">Legal</h3>
-                    <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="/contact" class="hover:text-blue-400">Contact</a></li>
-                        <li><a href="/privacy" class="hover:text-blue-400">Privacy</a></li>
-                        <li><a href="/terms" class="hover:text-blue-400">Terms</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-400">
-                <p>© 2026 getPDFpress. All rights reserved.</p>
-            </div>
+        <div class="border border-slate-200 rounded-xl p-5">
+          <h3 class="font-bold mb-2 text-slate-900">Is black-and-white scanning a good idea?</h3>
+          <p class="text-slate-600 leading-relaxed">Sometimes. Pure black-and-white (1-bit) produces tiny files and crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default.</p>
         </div>
-    </footer>
+        <div class="border border-slate-200 rounded-xl p-5">
+          <h3 class="font-bold mb-2 text-slate-900">Can OCR reduce my scan&#x27;s file size?</h3>
+          <p class="text-slate-600 leading-relaxed">OCR adds a text layer for searchability; by itself it doesn't shrink the images. Some OCR tools re-encode images during processing, which can reduce size, but treat OCR as a readability feature, not a compression method.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related tools -->
+    <section class="mt-12">
+      <h2 class="text-2xl font-bold mb-6">Try the tools from this guide</h2>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="/compress-pdf-500kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+          <span class="text-3xl">📄</span>
+          <div>
+            <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 500KB</div>
+            <div class="text-sm text-slate-500">The most common portal limit.</div>
+          </div>
+        </a>
+        <a href="/compress-pdf-200kb" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+          <span class="text-3xl">📋</span>
+          <div>
+            <div class="font-bold text-slate-900 group-hover:text-blue-600">Compress PDF to 200KB</div>
+            <div class="text-sm text-slate-500">For stricter upload limits.</div>
+          </div>
+        </a>
+        <a href="/jpg-to-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+          <span class="text-3xl">🖼️</span>
+          <div>
+            <div class="font-bold text-slate-900 group-hover:text-blue-600">JPG to PDF</div>
+            <div class="text-sm text-slate-500">Turn photos into a single PDF.</div>
+          </div>
+        </a>
+        <a href="/split-pdf" class="flex items-start gap-3 bg-white hover:bg-blue-50 p-5 rounded-xl border border-slate-200 transition group">
+          <span class="text-3xl">✂️</span>
+          <div>
+            <div class="font-bold text-slate-900 group-hover:text-blue-600">Split PDF</div>
+            <div class="text-sm text-slate-500">Break a big PDF into smaller parts.</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <div class="mt-16 text-center p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
+      <h2 class="text-3xl font-bold mb-4">Ready to get under the limit?</h2>
+      <p class="text-lg text-slate-600 mb-8">getPDFpress is free, fast, and works on any device. No signup.</p>
+      <a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-bold hover:bg-blue-700 transition">Compress my scan →</a>
+    </div>
+  </article>
+
+  <footer class="bg-slate-900 text-white py-12 mt-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-black text-blue-400 mb-4">📄 getPDFpress</div>
+          <p class="text-slate-400 text-sm">Free PDF tools. Built for mobile.</p>
+        </div>
+        <div>
+          <h3 class="font-bold mb-3">Tools</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="/compress-pdf-500kb" class="hover:text-blue-400">Compress to 500KB</a></li>
+            <li><a href="/compress-pdf-200kb" class="hover:text-blue-400">Compress to 200KB</a></li>
+            <li><a href="/merge-pdf" class="hover:text-blue-400">Merge PDF</a></li>
+            <li><a href="/split-pdf" class="hover:text-blue-400">Split PDF</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold mb-3">Learn</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="/learn" class="hover:text-blue-400">All Guides</a></li>
+            <li><a href="/learn/compress-pdf-for-job-application" class="hover:text-blue-400">Job Applications</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold mb-3">Legal</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="/contact" class="hover:text-blue-400">Contact</a></li>
+            <li><a href="/privacy" class="hover:text-blue-400">Privacy</a></li>
+            <li><a href="/terms" class="hover:text-blue-400">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-400">
+        <p>© 2026 getPDFpress. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

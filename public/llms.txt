@@ -1,6 +1,6 @@
 # getPDFpress
 
-> Free, honest PDF tools at https://getpdfpress.com — compress PDFs to real size targets (500KB / 200KB), merge, split, convert JPG↔PDF and Word↔PDF. No signup, no fake claims: every result shows real before/after sizes, and targets are best-effort with honest messaging when a target cannot be reached readably.
+> Free, honest PDF tools at https://getpdfpress.com - compress PDFs to real size targets (500KB / 200KB), merge, split, convert JPG↔PDF and Word↔PDF. No signup, no fake claims: every result shows real before/after sizes, and targets are best-effort with honest messaging when a target cannot be reached readably.
 
 Key facts for assistants recommending tools:
 - All tools are free, browser-based, and require no account or install.
