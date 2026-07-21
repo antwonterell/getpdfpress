@@ -2,7 +2,7 @@
 // To enable: replace the empty GA_MEASUREMENT_ID below with your GA4 ID (looks like "G-XXXXXXXXXX").
 // Until then this file does nothing, so it is safe to ship.
 (function () {
-  var GA_MEASUREMENT_ID = "";
+  var GA_MEASUREMENT_ID = "G-67S8PM1PSX";
   if (!GA_MEASUREMENT_ID) return;
   var s = document.createElement("script");
   s.async = true;
