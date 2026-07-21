@@ -1,5 +1,13 @@
 
 (function(){
+  // Mobile hamburger nav (runs on every page that has the shared header)
+  const navBar=document.querySelector('.site-header .nav'), navLinks=navBar&&navBar.querySelector('.nav-links');
+  if(navBar&&navLinks){
+    const t=document.createElement('button');
+    t.className='nav-toggle'; t.type='button'; t.setAttribute('aria-label','Open menu'); t.setAttribute('aria-expanded','false'); t.textContent='☰';
+    navBar.insertBefore(t,navLinks);
+    t.addEventListener('click',()=>{const open=navLinks.classList.toggle('open'); t.setAttribute('aria-expanded',open); t.setAttribute('aria-label',open?'Close menu':'Open menu');});
+  }
   const $ = (s, c=document)=>c.querySelector(s);
   const $$ = (s, c=document)=>Array.from(c.querySelectorAll(s));
   const fmt = b => !b ? '0 KB' : b < 1024*1024 ? Math.round(b/1024)+' KB' : (b/1024/1024).toFixed(1)+' MB';
