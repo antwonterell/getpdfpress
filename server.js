@@ -449,11 +449,12 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
     
     console.log(`   🎯 ${dpi} DPI, Q${quality}, resize: ${resize}`);
     
-    // Limit pages for extreme compression (prevent timeout)
+    // Never silently drop pages. If the document is too long for this method
+    // at the requested target, bail out and let the caller fall back honestly.
     const maxPages = bytesPerPage < 5000 ? 20 : 100;
     if (pageCount > maxPages) {
-      console.log(`   ⚠️ Too many pages (${pageCount}) for extreme compression. Limiting to ${maxPages} pages.`);
-      // Would need to implement page selection here
+      console.log(`   ⚠️ ${pageCount} pages exceeds the ${maxPages}-page cap for this target - skipping image method (no truncated output).`);
+      return null;
     }
     
     // Get actual page dimensions from PDF (don't assume Letter size!)
@@ -476,7 +477,7 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
     let totalSize = 0;
     let processedPages = 0;
     
-    for (let i = 1; i <= Math.min(pageCount, maxPages); i++) {
+    for (let i = 1; i <= pageCount; i++) {
       try {
         const result = await converter(i, { responseType: "buffer" });
         
@@ -695,9 +696,27 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     return current.bytes.length < best.bytes.length ? current : best;
   });
   
+  // GUARANTEE: a compressor must never return more bytes than it was given.
+  // If every method produced a larger file, return the original with an honest message.
+  if (bestResult.bytes.length >= originalSize) {
+    const originalBytes = await fs.readFile(inputPath);
+    console.log(`↩️ All methods produced larger files - returning the original (${originalSizeKB}KB)`);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
+      "Content-Length": originalBytes.length,
+      "X-Original-Size": originalSize,
+      "X-Compressed-Size": originalBytes.length,
+      "X-Compression-Method": "original",
+      "X-Target-Miss": "true",
+      "X-Warning-Message": `This PDF is already efficiently compressed - no method could make it smaller than ${originalSizeKB}KB without losing pages or readability. Your original file is returned unchanged. For a ${targetKB}KB target, try splitting the document and compressing each part.`,
+    });
+    return res.send(originalBytes);
+  }
+
   const bestSizeKB = Math.round(bestResult.bytes.length / 1024);
   const reduction = Math.round(((originalSize - bestResult.bytes.length) / originalSize) * 100);
-  
+
   console.log(`⚠️ Best: ${bestSizeKB}KB via ${bestResult.method} (-${reduction}%) - Target was ${targetKB}KB`);
   
   // Add warning message if target was unrealistic
@@ -899,6 +918,22 @@ async function basicCompress(req, res, inputPath) {
   const originalSizeKB = Math.round(req.file.size / 1024);
   const compressedSizeKB = Math.round(compressedBytes.length / 1024);
   const reduction = Math.round(((req.file.size - compressedBytes.length) / req.file.size) * 100);
+
+  // Rewriting an already-efficient PDF can inflate it; never return a larger file.
+  if (compressedBytes.length >= req.file.size) {
+    const originalBytes = pdfBytes;
+    console.log(`↩️ Optimization would grow the file (${compressedSizeKB}KB > ${originalSizeKB}KB) - returning original`);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="compressed-${req.file.originalname}"`,
+      "Content-Length": originalBytes.length,
+      "X-Original-Size": req.file.size,
+      "X-Compressed-Size": originalBytes.length,
+      "X-Compression-Method": "original",
+      "X-Warning-Message": "This PDF is already efficiently compressed - optimization could not reduce it further, so your original file is returned unchanged.",
+    });
+    return res.send(Buffer.from(originalBytes));
+  }
 
   console.log(`✅ Basic compressed: ${originalSizeKB}KB → ${compressedSizeKB}KB (-${reduction}%)`);
 

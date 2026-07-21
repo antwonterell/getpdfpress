@@ -68,11 +68,25 @@
     drop.addEventListener('click',()=>input.click());
     input.addEventListener('change',()=>{addFiles(input.files); input.value='';});
 
+    let progressEl=null;
+    function showProgress(){
+      if(progressEl) return;
+      progressEl=document.createElement('div');
+      progressEl.className='progressbar';
+      progressEl.setAttribute('role','progressbar');
+      progressEl.setAttribute('aria-label','Processing');
+      progressEl.innerHTML='<div class="bar"></div>';
+      status.insertAdjacentElement('afterend',progressEl);
+    }
+    function hideProgress(){ if(progressEl){progressEl.remove(); progressEl=null;} }
+
+    const btnLabel=btn.textContent;
     btn.addEventListener('click',async()=>{
       if(!ready()) return;
       if(blobUrl) URL.revokeObjectURL(blobUrl);
-      result.classList.remove('show'); btn.disabled=true;
-      setStatus('Working on it now. Larger scanned PDFs can take a moment.');
+      result.classList.remove('show'); btn.disabled=true; btn.textContent='Working…';
+      setStatus('Working on it now. Larger scanned PDFs can take a moment - no need to click again.');
+      showProgress();
       try{
         const fd=new FormData();
         files.forEach(f=>fd.append(multi?'files':'file',f));
@@ -91,7 +105,7 @@
         setStatus(warning||'Done. Download your processed file below.','ok');
         window.getPDFpressDownloadComplete=function(){ if(window.gtag) gtag('event','download_complete',{tool:mode}); };
       }catch(err){setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')}
-      finally{btn.disabled=!ready();}
+      finally{hideProgress(); btn.textContent=btnLabel; btn.disabled=!ready();}
     });
 
     render();
