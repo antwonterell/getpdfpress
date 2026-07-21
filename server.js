@@ -193,7 +193,14 @@ app.use((req, res, next) => {
 const rateBuckets = new Map();
 function rateLimit(max, windowMs, label) {
   return (req, res, next) => {
-    const ip = req.headers["cf-connecting-ip"] || req.socket.remoteAddress || "unknown";
+    // Never rate-limit health checks: Render pings frequently and marks the
+    // instance dead on 429, causing a restart loop. (req.path is relative to
+    // the mount point, so check both forms.)
+    if (req.path === "/health" || req.path === "/api/health") return next();
+    // Behind Render's proxy every socket shares the proxy IP, so identify the
+    // real client: Cloudflare header first, then the forwarded-for chain.
+    const fwd = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    const ip = req.headers["cf-connecting-ip"] || fwd || req.socket.remoteAddress || "unknown";
     const key = `${label}:${ip}`;
     const now = Date.now();
     let bucket = rateBuckets.get(key);
