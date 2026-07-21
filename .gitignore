@@ -1,0 +1,10 @@
+node_modules/
+uploads/
+output/
+.env
+.env.*
+npm-debug.log
+*.zip
+.DS_Store
+.vscode/
+.idea/
