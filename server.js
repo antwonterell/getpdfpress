@@ -201,6 +201,8 @@ app.use((req, res, next) => {
 app.use(express.static("public", {
   maxAge: process.env.NODE_ENV === "production" ? "30d" : 0,
   etag: true,
+  redirect: false, // don't 301 /learn -> /learn/; the explicit route serves it directly
+
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
