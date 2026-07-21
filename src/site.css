@@ -34,3 +34,23 @@
 @keyframes gpp-slide{0%{transform:translateX(-110%)}100%{transform:translateX(360%)}}
 @keyframes gpp-hue{0%{background-position:0% 0}100%{background-position:300% 0}}
 .chip-break{flex-basis:100%;height:0}
+
+/* Comparison table */
+.cmp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(20,33,61,.055)}
+.cmp-table{width:100%;border-collapse:collapse;min-width:560px}
+.cmp-table th,.cmp-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:15px}
+.cmp-table thead th{font-size:14px;letter-spacing:.02em;color:var(--muted)}
+.cmp-table thead th:nth-child(2){color:var(--brand);font-weight:900}
+.cmp-table td:first-child{font-weight:750;color:var(--ink)}
+.cmp-table td:nth-child(2){background:#f4f8ff;font-weight:650}
+.cmp-table tbody tr:last-child td{border-bottom:0}
+/* FAQ */
+.faq-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 8px 24px rgba(20,33,61,.05)}
+.faq-item summary{cursor:pointer;font-weight:800;font-size:16px;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.faq-item summary::after{content:'+';font-size:22px;color:var(--brand);font-weight:700;flex-shrink:0}
+.faq-item[open] summary::after{content:'\2212'}
+.faq-item p{color:var(--muted);margin-bottom:4px}
+/* Overflow insurance on results and status */
+.stat strong{overflow-wrap:anywhere}
+.status{overflow-wrap:anywhere}
+@media(max-width:560px){.chip-name{max-width:120px}.cmp-table th,.cmp-table td{padding:11px 12px;font-size:14px}}
