@@ -33,3 +33,4 @@
 .progressbar .bar{position:absolute;top:0;left:0;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#7c3aed,#c9a227,#2563eb);background-size:300% 100%;animation:gpp-slide 1.15s cubic-bezier(.45,.05,.55,.95) infinite,gpp-hue 2.6s linear infinite}
 @keyframes gpp-slide{0%{transform:translateX(-110%)}100%{transform:translateX(360%)}}
 @keyframes gpp-hue{0%{background-position:0% 0}100%{background-position:300% 0}}
+.chip-break{flex-basis:100%;height:0}

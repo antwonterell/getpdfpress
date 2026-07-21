@@ -31,7 +31,7 @@
         fileName.textContent='No file selected';
       }else{
         fileName.innerHTML=files.map((f,i)=>`<span class="file-chip"><span class="chip-name">${esc(f.name)}</span><span class="chip-size">${fmt(f.size)}</span><button type="button" class="chip-x" data-i="${i}" aria-label="Remove ${esc(f.name)}">✕</button></span>`).join('')
-          + (multi ? '<span class="file-chip add-more">+ Add more</span>' : '');
+          + (multi ? '<span class="chip-break"></span><span class="file-chip add-more">+ Add more</span>' : '');
       }
       btn.disabled=!ready();
       if(files.length){
@@ -57,6 +57,9 @@
     }
 
     fileName.addEventListener('click',e=>{
+      // The chip list sits inside the clickable uploader; without this,
+      // removing a file also pops the file picker.
+      e.stopPropagation();
       const x=e.target.closest('.chip-x');
       if(x){ files.splice(Number(x.dataset.i),1); render(); return; }
       if(e.target.closest('.add-more')){ input.click(); }

@@ -671,7 +671,8 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
           "X-Compression-Quality": imageResult.quality,
         });
 
-        return res.send(imageResult.bytes);
+        // Must be a Buffer: express serializes a raw Uint8Array as JSON text
+        return res.send(Buffer.from(imageResult.bytes));
       }
       
       console.log(`   Result: ${method3KB}KB (close but not quite)`);
@@ -739,7 +740,8 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     "X-Warning-Message": warningMessage || undefined,
   });
 
-  return res.send(bestResult.bytes);
+  // Must be a Buffer: express serializes a raw Uint8Array as JSON text
+  return res.send(Buffer.from(bestResult.bytes));
 }
 
 // ============================================
@@ -1103,13 +1105,16 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
 
     console.log(`📄 Converting ${pageCount} page(s) to images...`);
 
-    // FIXED: Remove width/height to preserve aspect ratio
+    // pdf2pic defaults to 768x512 unless given explicit dimensions, which
+    // squishes pages. Derive real pixel size from the PDF page at 200 DPI.
+    const dims0 = pdfDoc.getPage(0).getSize();
     const converter = fromPath(inputPath, {
-      density: 200,  // Higher DPI for better quality
+      density: 200,
       saveFilename: `page-${Date.now()}`,
       savePath: outputDir,
       format: "png",
-      // No width/height = preserves original PDF page dimensions
+      width: Math.round((dims0.width / 72) * 200),
+      height: Math.round((dims0.height / 72) * 200),
     });
 
     // Convert all pages
@@ -1178,11 +1183,15 @@ app.post("/api/pdf-to-images-download", upload.single("file"), async (req, res) 
 
     console.log(`📄 Converting page ${pageNumber} to image...`);
 
+    const singleDoc = await PDFDocument.load(await fs.readFile(inputPath));
+    const sDims = singleDoc.getPage(0).getSize();
     const converter = fromPath(inputPath, {
       density: 200,
       saveFilename: `page-${Date.now()}`,
       savePath: outputDir,
       format: "png",
+      width: Math.round((sDims.width / 72) * 200),
+      height: Math.round((sDims.height / 72) * 200),
     });
 
     const result = await converter(pageNumber, { responseType: "image" });
@@ -1243,11 +1252,14 @@ app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
 
     console.log(`📦 Creating ZIP with ${pageCount} images...`);
 
+    const zDims = pdfDoc.getPage(0).getSize();
     const converter = fromPath(inputPath, {
       density: 200,
       saveFilename: `page-${Date.now()}`,
       savePath: outputDir,
       format: "png",
+      width: Math.round((zDims.width / 72) * 200),
+      height: Math.round((zDims.height / 72) * 200),
     });
 
     // Convert all pages
