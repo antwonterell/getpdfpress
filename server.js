@@ -404,51 +404,27 @@ app.post("/api/compress", upload.single("file"), async (req, res) => {
 // HELPER: PDF → Images → PDF (NUCLEAR OPTION - Always works!)
 // ============================================
 async function compressViaImages(inputPath, targetBytes, originalFilename, originalSize) {
-  console.log(`🎨 PDF→Images→PDF method (works on ANY PDF!)`);
-  
+  console.log(`🎨 PDF→Images→PDF method (closed-loop)`);
+
   try {
     const pdfDoc = await PDFDocument.load(await fs.readFile(inputPath));
     const pageCount = pdfDoc.getPageCount();
-    
+
     console.log(`   📄 ${pageCount} pages to process`);
-    
-    // Check if target is realistic
+
     const bytesPerPage = targetBytes / pageCount;
     const targetKB = Math.round(targetBytes / 1024);
-    
-    if (bytesPerPage < 3000) {
-      console.log(`   ⚠️ Target ${targetKB}KB for ${pageCount} pages = ${Math.round(bytesPerPage/1024)}KB/page (too aggressive!)`);
-      // For very aggressive targets, still try but with minimum quality
-    }
-    
-    // IMPROVED DPI/Quality calculation
+
+    // Starting parameters predicted from the per-page byte budget
     let dpi, quality, resize = 1.0;
-    
-    if (bytesPerPage > 150000) {
-      // >150KB/page - high quality
-      dpi = 150; quality = 80;
-    } else if (bytesPerPage > 80000) {
-      // 80-150KB/page - good quality
-      dpi = 120; quality = 70;
-    } else if (bytesPerPage > 40000) {
-      // 40-80KB/page - medium quality
-      dpi = 96; quality = 60;
-    } else if (bytesPerPage > 20000) {
-      // 20-40KB/page - acceptable quality
-      dpi = 72; quality = 50;
-    } else if (bytesPerPage > 10000) {
-      // 10-20KB/page - low quality but readable
-      dpi = 72; quality = 35;
-    } else if (bytesPerPage > 5000) {
-      // 5-10KB/page - very low quality
-      dpi = 60; quality = 25; resize = 0.85;
-    } else {
-      // <5KB/page - extreme (barely readable)
-      dpi = 48; quality = 15; resize = 0.7;
-    }
-    
-    console.log(`   🎯 ${dpi} DPI, Q${quality}, resize: ${resize}`);
-    
+    if (bytesPerPage > 150000)      { dpi = 150; quality = 80; }
+    else if (bytesPerPage > 80000)  { dpi = 120; quality = 70; }
+    else if (bytesPerPage > 40000)  { dpi = 96;  quality = 60; }
+    else if (bytesPerPage > 20000)  { dpi = 72;  quality = 50; }
+    else if (bytesPerPage > 10000)  { dpi = 72;  quality = 35; }
+    else if (bytesPerPage > 5000)   { dpi = 60;  quality = 25; resize = 0.85; }
+    else                            { dpi = 48;  quality = 15; resize = 0.7; }
+
     // Never silently drop pages. If the document is too long for this method
     // at the requested target, bail out and let the caller fall back honestly.
     const maxPages = bytesPerPage < 5000 ? 20 : 100;
@@ -456,90 +432,100 @@ async function compressViaImages(inputPath, targetBytes, originalFilename, origi
       console.log(`   ⚠️ ${pageCount} pages exceeds the ${maxPages}-page cap for this target - skipping image method (no truncated output).`);
       return null;
     }
-    
-    // Get actual page dimensions from PDF (don't assume Letter size!)
+
     const firstPage = pdfDoc.getPage(0);
     const { width: pageWidth, height: pageHeight } = firstPage.getSize();
-    const pageWidthInches = pageWidth / 72; // Convert points to inches
+    const pageWidthInches = pageWidth / 72;
     const pageHeightInches = pageHeight / 72;
-    
-    console.log(`   📏 PDF page: ${pageWidthInches.toFixed(1)}" x ${pageHeightInches.toFixed(1)}" (aspect: ${(pageWidthInches/pageHeightInches).toFixed(2)})`);
-    
-    // Calculate dimensions based on ACTUAL page size (preserves aspect ratio!)
-    const converter = fromPath(inputPath, {
-      density: dpi,
-      format: "png",
-      width: Math.floor(dpi * pageWidthInches * resize),
-      height: Math.floor(dpi * pageHeightInches * resize),
-    });
-    
-    const newPdfDoc = await PDFDocument.create();
-    let totalSize = 0;
-    let processedPages = 0;
-    
-    for (let i = 1; i <= pageCount; i++) {
-      try {
-        const result = await converter(i, { responseType: "buffer" });
-        
-        const compressedImage = await sharp(result.buffer)
-          .resize({
-            width: Math.floor(dpi * pageWidthInches * resize),
-            fit: 'inside'
-          })
-          .jpeg({ 
-            quality: quality,
-            progressive: true,
-            mozjpeg: true
-          })
-          .toBuffer();
-        
-        const img = await newPdfDoc.embedJpg(compressedImage);
-        const page = newPdfDoc.addPage([img.width, img.height]);
-        page.drawImage(img, {
-          x: 0,
-          y: 0,
-          width: img.width,
-          height: img.height,
-        });
-        
-        totalSize += compressedImage.length;
-        processedPages++;
-        
-        // Dynamic quality adjustment
-        if (totalSize > targetBytes * 0.7 && i < pageCount) {
-          const remaining = pageCount - i;
-          const budgetRemaining = targetBytes - totalSize;
-          const budgetPerPage = budgetRemaining / remaining;
-          
-          if (budgetPerPage < bytesPerPage * 0.6) {
-            quality = Math.max(10, quality - 5);
-            resize = Math.max(0.6, resize - 0.05);
-            console.log(`      Adjusting: Q${quality}, resize ${resize}`);
+
+    async function renderPass(passDpi, passQuality, passResize) {
+      const converter = fromPath(inputPath, {
+        density: passDpi,
+        format: "png",
+        width: Math.floor(passDpi * pageWidthInches * passResize),
+        height: Math.floor(passDpi * pageHeightInches * passResize),
+      });
+
+      const newPdfDoc = await PDFDocument.create();
+      let totalSize = 0;
+      let processedPages = 0;
+      let q = passQuality;
+      let rs = passResize;
+
+      for (let i = 1; i <= pageCount; i++) {
+        try {
+          const result = await converter(i, { responseType: "buffer" });
+
+          const compressedImage = await sharp(result.buffer)
+            .resize({ width: Math.floor(passDpi * pageWidthInches * rs), fit: "inside" })
+            .jpeg({ quality: q, progressive: true, mozjpeg: true })
+            .toBuffer();
+
+          const img = await newPdfDoc.embedJpg(compressedImage);
+          const page = newPdfDoc.addPage([img.width, img.height]);
+          page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+
+          totalSize += compressedImage.length;
+          processedPages++;
+
+          // Mid-pass adjustment when the budget is running out
+          if (totalSize > targetBytes * 0.7 && i < pageCount) {
+            const budgetPerPage = (targetBytes - totalSize) / (pageCount - i);
+            if (budgetPerPage < bytesPerPage * 0.6) {
+              q = Math.max(10, q - 5);
+              rs = Math.max(0.6, rs - 0.05);
+            }
           }
+        } catch (pageError) {
+          console.error(`      ⚠️ Page ${i} failed, skipping`);
+          continue;
         }
-      } catch (pageError) {
-        console.error(`      ⚠️ Page ${i} failed, skipping`);
-        continue;
       }
+
+      if (processedPages === 0) {
+        throw new Error("No pages could be processed");
+      }
+
+      const bytes = await newPdfDoc.save({ useObjectStreams: true });
+      return { bytes, processedPages, finalQuality: q };
     }
-    
-    if (processedPages === 0) {
-      throw new Error("No pages could be processed");
+
+    // Closed loop: render, measure, and retry with scaled-down parameters
+    // when the result overshoots the target. Bounded to protect the server.
+    const maxAttempts = pageCount <= 30 ? 3 : 1;
+    let best = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`   🎯 Attempt ${attempt}/${maxAttempts}: ${dpi} DPI, Q${quality}, resize ${resize}`);
+      const pass = await renderPass(dpi, quality, resize);
+      const sizeKB = Math.round(pass.bytes.length / 1024);
+      console.log(`   Result: ${sizeKB}KB (${pass.processedPages} pages)`);
+
+      if (!best || pass.bytes.length < best.bytes.length) {
+        best = { bytes: pass.bytes, processedPages: pass.processedPages, dpi, quality };
+      }
+
+      if (pass.bytes.length <= targetBytes * 1.05) break;
+
+      // Scale parameters toward the target for the next attempt
+      const factor = targetBytes / pass.bytes.length;
+      const nextQuality = Math.max(10, Math.round(quality * Math.pow(factor, 0.6)));
+      const nextDpi = Math.max(48, Math.round(dpi * Math.pow(factor, 0.35)));
+      const nextResize = Math.max(0.55, Number((resize * Math.pow(factor, 0.2)).toFixed(2)));
+      if (nextQuality === quality && nextDpi === dpi && nextResize === resize) break;
+      quality = nextQuality; dpi = nextDpi; resize = nextResize;
     }
-    
-    const finalPdfBytes = await newPdfDoc.save({ useObjectStreams: true });
-    const finalSizeKB = Math.round(finalPdfBytes.length / 1024);
-    
-    console.log(`   ✅ Result: ${finalSizeKB}KB (${processedPages} pages)`);
-    
+
+    console.log(`   ✅ Best: ${Math.round(best.bytes.length / 1024)}KB (target ${targetKB}KB)`);
+
     return {
-      bytes: finalPdfBytes,
+      bytes: best.bytes,
       method: 'pdf-to-images',
-      dpi: dpi,
-      quality: quality,
-      pagesProcessed: processedPages
+      dpi: best.dpi,
+      quality: best.quality,
+      pagesProcessed: best.processedPages
     };
-    
+
   } catch (error) {
     console.error(`   ❌ PDF→Images failed:`, error.message);
     return null;
@@ -728,7 +714,7 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     warningMessage = `Compressed to ${bestSizeKB}KB (best possible while maintaining readability). For ${targetKB}KB target with ${pageCount} pages, consider removing unnecessary pages or splitting the document.`;
   }
   
-  res.set({
+  const finalHeaders = {
     "Content-Type": "application/pdf",
     "Content-Disposition": `attachment; filename="compressed-${originalFilename}"`,
     "Content-Length": bestResult.bytes.length,
@@ -737,8 +723,10 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
     "X-Compression-Method": bestResult.method,
     "X-Target-Size": targetBytes,
     "X-Target-Miss": "true",
-    "X-Warning-Message": warningMessage || undefined,
-  });
+  };
+  // Only set when present; res.set with undefined emits the literal string "undefined"
+  if (warningMessage) finalHeaders["X-Warning-Message"] = warningMessage;
+  res.set(finalHeaders);
 
   // Must be a Buffer: express serializes a raw Uint8Array as JSON text
   return res.send(Buffer.from(bestResult.bytes));
