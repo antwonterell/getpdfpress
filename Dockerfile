@@ -4,7 +4,9 @@
 FROM node:18-alpine
 
 # Environment variables
-ENV NODE_OPTIONS="--max-old-space-size=450"
+# Heap capped at 320MB: ghostscript/graphicsmagick/sharp use native memory OUTSIDE
+# the Node heap, and the whole container only gets 512MB on the Starter plan.
+ENV NODE_OPTIONS="--max-old-space-size=320"
 ENV HOME=/tmp
 ENV TMPDIR=/tmp
 
@@ -21,8 +23,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies (using npm install since no package-lock.json)
-RUN npm install --omit=dev
+# Install exact locked production dependencies
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .

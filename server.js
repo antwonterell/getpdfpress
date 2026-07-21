@@ -19,8 +19,8 @@ const PORT = process.env.PORT || 3000;
 // ============================================
 // PRODUCTION CONFIGURATION
 // ============================================
-const MAX_CONCURRENT_REQUESTS = 5; // Starter plan can handle 5 concurrent
-const REQUEST_TIMEOUT = 45000; // 45 seconds
+const MAX_CONCURRENT_REQUESTS = 2; // 512MB instance: >2 heavy PDF jobs at once risks OOM restarts
+const REQUEST_TIMEOUT = 90000; // 90 seconds (must exceed ConvertAPI's 60s axios timeout)
 const CONVERTAPI_SECRET = process.env.CONVERTAPI_SECRET || "";
 
 let activeRequests = 0;
@@ -154,9 +154,10 @@ const storage = multer.diskStorage({
   },
 });
 
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25MB: larger files get base64-expanded ~3x in RAM on a 512MB instance
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: MAX_UPLOAD_BYTES },
 });
 
 // ============================================
@@ -200,6 +201,8 @@ app.use((req, res, next) => {
 app.use(express.static("public", {
   maxAge: process.env.NODE_ENV === "production" ? "30d" : 0,
   etag: true,
+  redirect: false, // don't 301 /learn -> /learn/; the explicit route serves it directly
+
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
@@ -307,6 +310,21 @@ app.get("/learn/pdf-to-word-conversion-guide", (req, res) => {
 
 app.get("/learn/why-is-my-pdf-so-large", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "learn", "why-is-my-pdf-so-large.html"));
+});
+
+// Retired duplicate article URLs -> canonical versions (301 so search engines consolidate)
+const RETIRED_ARTICLE_REDIRECTS = {
+  "/learn/best-pdf-size-for-email-attachments": "/learn/best-pdf-size-for-email",
+  "/learn/compress-pdf-for-uscis-or-immigration-forms": "/learn/compress-pdf-for-uscis-immigration",
+  "/learn/pdf-compression-vs-pdf-quality": "/learn/pdf-compression-vs-quality",
+  "/learn/reduce-pdf-file-size-on-iphone": "/learn/reduce-pdf-size-iphone",
+  "/learn/reduce-pdf-file-size-on-android": "/learn/reduce-pdf-size-android",
+};
+
+app.use((req, res, next) => {
+  const target = RETIRED_ARTICLE_REDIRECTS[req.path];
+  if (target) return res.redirect(301, target);
+  next();
 });
 
 // Apply queue to processing endpoints
@@ -592,7 +610,8 @@ async function compressToTargetColorOnly(req, res, inputPath, targetBytes, origi
   }
   
   // METHOD 2: ConvertAPI (Good for image PDFs, BUT can make files bigger!)
-  if (CONVERTAPI_SECRET && method1Result) {
+  // Skip for files over 10MB: base64-encoding the upload roughly triples its RAM footprint.
+  if (CONVERTAPI_SECRET && method1Result && originalSize <= 10 * 1024 * 1024) {
     console.log(`📊 Method 2: ConvertAPI...`);
     method2Result = await tryConvertAPICompression(inputPath, originalFilename, targetBytes, originalSize);
     
@@ -1038,6 +1057,15 @@ app.post("/api/pdf-to-images", upload.single("file"), async (req, res) => {
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pageCount = pdfDoc.getPageCount();
 
+    // This endpoint returns every page as base64 JSON, which lives entirely in RAM.
+    // Cap it hard; the ZIP endpoint streams from disk and handles longer documents.
+    if (pageCount > 20) {
+      return res.status(413).json({
+        error: "Too many pages",
+        message: `This PDF has ${pageCount} pages. Preview conversion supports up to 20 pages - use the ZIP download for longer documents.`,
+      });
+    }
+
     console.log(`📄 Converting ${pageCount} page(s) to images...`);
 
     // FIXED: Remove width/height to preserve aspect ratio
@@ -1171,6 +1199,13 @@ app.post("/api/pdf-to-images-zip", upload.single("file"), async (req, res) => {
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pageCount = pdfDoc.getPageCount();
 
+    if (pageCount > 60) {
+      return res.status(413).json({
+        error: "Too many pages",
+        message: `This PDF has ${pageCount} pages. PDF to JPG supports up to 60 pages - split the PDF first for longer documents.`,
+      });
+    }
+
     console.log(`📦 Creating ZIP with ${pageCount} images...`);
 
     const converter = fromPath(inputPath, {
@@ -1277,6 +1312,26 @@ app.post("/api/images-to-pdf", upload.array("files", 50), async (req, res) => {
   }
 });
 
+// ConvertAPI quota/auth failures should read as "temporarily unavailable", not a crash.
+function convertApiFriendlyError(error) {
+  const status = error.response?.status;
+  const apiMessage = error.response?.data?.Message || "";
+  const quotaHit =
+    status === 401 || status === 402 || status === 403 ||
+    /credit|quota|limit|payment|subscription/i.test(apiMessage);
+
+  if (quotaHit) {
+    return {
+      status: 503,
+      body: {
+        error: "Tool temporarily unavailable",
+        message: "Document conversion is temporarily unavailable while we upgrade capacity. Compress, merge, split, and image tools all still work.",
+      },
+    };
+  }
+  return null;
+}
+
 // ============================================
 // WORD TO PDF - ConvertAPI
 // ============================================
@@ -1364,6 +1419,10 @@ app.post("/api/word-to-pdf", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("❌ Word to PDF error:", error.message);
     console.error("❌ Error details:", error.response?.data || error);
+    const friendly = convertApiFriendlyError(error);
+    if (friendly) {
+      return res.status(friendly.status).json(friendly.body);
+    }
     res.status(500).json({
       error: "Conversion failed",
       details: error.response?.data?.Message || error.message,
@@ -1459,6 +1518,10 @@ app.post("/api/pdf-to-word", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("❌ PDF to Word error:", error.message);
     console.error("❌ Error details:", error.response?.data || error);
+    const friendly = convertApiFriendlyError(error);
+    if (friendly) {
+      return res.status(friendly.status).json(friendly.body);
+    }
     res.status(500).json({
       error: "Conversion failed",
       details: error.response?.data?.Message || error.message,
@@ -1504,7 +1567,7 @@ app.use((err, req, res, next) => {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(413).json({
         error: "File too large",
-        message: "Max file size is 50MB",
+        message: "Max file size is 25MB. Try splitting the PDF first, then compressing each part.",
       });
     }
     return res.status(400).json({ error: err.message });
