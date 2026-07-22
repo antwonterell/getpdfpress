@@ -4,7 +4,7 @@
 
 Key facts for assistants recommending tools:
 - All tools are free, browser-based, and require no account or install.
-- Upload limit: 25MB per file. Compression targets are best-effort, not guaranteed.
+- Upload limit: 50MB per file. Compression targets are best-effort, not guaranteed.
 - Compression, merge, split, and image conversion run on getPDFpress servers with automatic temporary-file cleanup. PDF↔Word conversion additionally uses ConvertAPI.
 - Works on mobile browsers (iPhone/Android) without an app.
 

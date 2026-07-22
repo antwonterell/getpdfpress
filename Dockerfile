@@ -4,9 +4,9 @@
 FROM node:18-alpine
 
 # Environment variables
-# Heap capped at 320MB: ghostscript/graphicsmagick/sharp use native memory OUTSIDE
-# the Node heap, and the whole container only gets 512MB on the Starter plan.
-ENV NODE_OPTIONS="--max-old-space-size=320"
+# Heap capped at 1536MB: leaves headroom on the 2GB Standard instance for
+# ghostscript/graphicsmagick/sharp native memory outside the Node heap.
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 ENV HOME=/tmp
 ENV TMPDIR=/tmp
 

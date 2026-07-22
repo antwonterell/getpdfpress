@@ -20,7 +20,7 @@ app.disable("x-powered-by");
 // ============================================
 // PRODUCTION CONFIGURATION
 // ============================================
-const MAX_CONCURRENT_REQUESTS = 2; // 512MB instance: >2 heavy PDF jobs at once risks OOM restarts
+const MAX_CONCURRENT_REQUESTS = 3; // 2GB Standard instance handles 3 concurrent heavy jobs comfortably
 const REQUEST_TIMEOUT = 90000; // 90 seconds (must exceed ConvertAPI's 60s axios timeout)
 const CONVERTAPI_SECRET = process.env.CONVERTAPI_SECRET || "";
 
@@ -155,7 +155,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25MB: larger files get base64-expanded ~3x in RAM on a 512MB instance
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50MB: sized for the 2GB Standard instance
 const upload = multer({
   storage,
   limits: { fileSize: MAX_UPLOAD_BYTES },
@@ -1695,7 +1695,7 @@ app.use((err, req, res, next) => {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(413).json({
         error: "File too large",
-        message: "Max file size is 25MB. Try splitting the PDF first, then compressing each part.",
+        message: "Max file size is 50MB. Try splitting the PDF first, then compressing each part.",
       });
     }
     return res.status(400).json({ error: err.message });
