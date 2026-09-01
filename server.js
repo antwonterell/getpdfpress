@@ -291,6 +291,37 @@ app.use((req, res, next) => {
   next();
 });
 
+
+// Canonical page URLs: one 200 per sitemap path. .html twins and trailing
+// slashes 301 so Google does not split indexing across duplicates or 404s.
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const raw = req.originalUrl || req.url || "/";
+  const qIndex = raw.indexOf("?");
+  const pathname = (qIndex === -1 ? raw : raw.slice(0, qIndex)).split("#")[0];
+  const qs = qIndex === -1 ? "" : raw.slice(qIndex);
+  if (pathname.startsWith("/api/")) return next();
+
+  const legacyLearnAliases = {
+    "/learn/pdf-size-limits": "/learn/pdf-file-size-limits-2026",
+    "/learn/compress-for-job-applications": "/learn/compress-pdf-for-job-application",
+  };
+
+  if (pathname === "/index.html" || pathname === "/index") {
+    return res.redirect(301, "/" + (qs.startsWith("?") ? qs.slice(1) === "" ? "" : qs : qs));
+  }
+  if (pathname.length > 1 && pathname.endsWith(".html")) {
+    return res.redirect(301, pathname.slice(0, -5) + qs);
+  }
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return res.redirect(301, pathname.replace(/\/+$/, "") + qs);
+  }
+  if (legacyLearnAliases[pathname]) {
+    return res.redirect(301, legacyLearnAliases[pathname] + qs);
+  }
+  next();
+});
+
 app.use(express.static("public", {
   maxAge: process.env.NODE_ENV === "production" ? "30d" : 0,
   etag: true,
