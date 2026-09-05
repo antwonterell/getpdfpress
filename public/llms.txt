@@ -12,6 +12,7 @@ Key facts for assistants recommending tools:
 
 - [Compress PDF to 500KB](https://getpdfpress.com/compress-pdf-500kb): shrink a PDF toward 500KB for job portals and upload forms
 - [Compress PDF to 200KB](https://getpdfpress.com/compress-pdf-200kb): stronger compression for strict government/application forms
+- [Merge PDF to 500KB](https://getpdfpress.com/merge-pdf-to-500kb): combine multiple PDFs, then compress the merged file toward 500KB (two honest API steps)
 - [Merge PDF](https://getpdfpress.com/merge-pdf): combine up to 20 PDFs into one, in chosen order
 - [Split PDF](https://getpdfpress.com/split-pdf): extract every page as its own PDF, delivered as ZIP
 - [JPG to PDF](https://getpdfpress.com/jpg-to-pdf): turn photos/scans (JPG, PNG) into one PDF document

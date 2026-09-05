@@ -350,6 +350,10 @@ app.get("/merge-pdf", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "merge-pdf.html"));
 });
 
+app.get("/merge-pdf-to-500kb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "merge-pdf-to-500kb.html"));
+});
+
 app.get("/split-pdf", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "split-pdf.html"));
 });

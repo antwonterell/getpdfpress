@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://getpdfpress.com/</loc></url>
-<url><loc>https://getpdfpress.com/compress-pdf-500kb</loc></url>
+<url><loc>https://getpdfpress.com/</loc><lastmod>2026-09-05</lastmod></url>
+<url><loc>https://getpdfpress.com/compress-pdf-500kb</loc><lastmod>2026-09-05</lastmod></url>
 <url><loc>https://getpdfpress.com/compress-pdf-200kb</loc></url>
-<url><loc>https://getpdfpress.com/merge-pdf</loc></url>
+<url><loc>https://getpdfpress.com/merge-pdf</loc><lastmod>2026-09-05</lastmod></url>
+<url><loc>https://getpdfpress.com/merge-pdf-to-500kb</loc><lastmod>2026-09-05</lastmod></url>
 <url><loc>https://getpdfpress.com/split-pdf</loc></url>
 <url><loc>https://getpdfpress.com/jpg-to-pdf</loc></url>
 <url><loc>https://getpdfpress.com/pdf-to-jpg</loc></url>
@@ -26,9 +27,9 @@
 <url><loc>https://getpdfpress.com/learn/pdf-to-word-conversion-guide</loc></url>
 <url><loc>https://getpdfpress.com/learn/pdf-too-large-for-upload</loc></url>
 <url><loc>https://getpdfpress.com/learn/compress-scanned-pdf-readable</loc></url>
-<url><loc>https://getpdfpress.com/learn/compress-pdf-for-uscis-immigration</loc></url>
+<url><loc>https://getpdfpress.com/learn/compress-pdf-for-uscis-immigration</loc><lastmod>2026-09-05</lastmod></url>
 <url><loc>https://getpdfpress.com/learn/best-pdf-size-for-email</loc></url>
-<url><loc>https://getpdfpress.com/learn/reduce-pdf-size-iphone</loc></url>
+<url><loc>https://getpdfpress.com/learn/reduce-pdf-size-iphone</loc><lastmod>2026-09-05</lastmod></url>
 <url><loc>https://getpdfpress.com/learn/reduce-pdf-size-android</loc></url>
 <url><loc>https://getpdfpress.com/learn/pdf-compression-vs-quality</loc></url>
 <url><loc>https://getpdfpress.com/learn/how-to-merge-multiple-pdfs</loc></url>

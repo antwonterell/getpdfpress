@@ -24,7 +24,7 @@
 
     function setStatus(msg,type=''){status.textContent=msg; status.className='status show '+type;}
 
-    function ready(){ return mode==='merge' ? files.length>=2 : files.length>=1; }
+    function ready(){ return (mode==='merge'||mode==='merge-compress') ? files.length>=2 : files.length>=1; }
 
     function render(){
       if(!files.length){
@@ -36,7 +36,7 @@
       btn.disabled=!ready();
       if(files.length){
         const total=files.reduce((n,f)=>n+f.size,0);
-        if(mode==='merge'&&files.length<2) setStatus('Add at least one more PDF to merge.');
+        if((mode==='merge'||mode==='merge-compress')&&files.length<2) setStatus('Add at least one more PDF to merge.');
         else setStatus(`${files.length} file${files.length>1?'s':''} ready (${fmt(total)} total). Review the list above, then press the button. Processing is best-effort and exact targets are not guaranteed.`);
       }else{
         status.className='status';
@@ -88,23 +88,45 @@
       if(!ready()) return;
       if(blobUrl) URL.revokeObjectURL(blobUrl);
       result.classList.remove('show'); btn.disabled=true; btn.textContent='Working…';
-      setStatus('Working on it now. Larger scanned PDFs can take a moment - no need to click again.');
+      setStatus(mode==='merge-compress'
+        ? 'Step 1 of 2: merging PDFs. Then we compress toward 500KB.'
+        : 'Working on it now. Larger scanned PDFs can take a moment - no need to click again.');
       showProgress();
       try{
-        const fd=new FormData();
-        files.forEach(f=>fd.append(multi?'files':'file',f));
-        if(target) fd.append('targetSize',target);
-        const res=await fetch(endpointMap[mode],{method:'POST',body:fd});
-        if(!res.ok){let j={}; try{j=await res.json()}catch{} throw new Error(j.message||j.error||`Server returned ${res.status}`)}
-        const blob=await res.blob(); blobUrl=URL.createObjectURL(blob);
-        const cd=res.headers.get('Content-Disposition')||''; const m=cd.match(/filename="?([^";]+)"?/);
-        const name=m?m[1]:(mode==='split'||mode==='pdf-to-jpg'?'getpdfpress-output.zip':'getpdfpress-output.pdf');
-        dl.href=blobUrl; dl.download=name;
+        let blob, name, warning='';
         const totalIn=files.reduce((n,f)=>n+f.size,0);
+        if(mode==='merge-compress'){
+          const fdMerge=new FormData();
+          files.forEach(f=>fdMerge.append('files',f));
+          const resMerge=await fetch('/api/merge',{method:'POST',body:fdMerge});
+          if(!resMerge.ok){let j={}; try{j=await resMerge.json()}catch{} throw new Error(j.message||j.error||`Merge failed (${resMerge.status})`)}
+          const mergedBlob=await resMerge.blob();
+          setStatus('Step 2 of 2: compressing the merged PDF toward 500KB. Best-effort, not guaranteed.');
+          const fdComp=new FormData();
+          fdComp.append('file',mergedBlob,'merged.pdf');
+          fdComp.append('targetSize',target||'500');
+          const resComp=await fetch('/api/compress',{method:'POST',body:fdComp});
+          if(!resComp.ok){let j={}; try{j=await resComp.json()}catch{} throw new Error(j.message||j.error||`Compress failed (${resComp.status})`)}
+          blob=await resComp.blob();
+          const cd=resComp.headers.get('Content-Disposition')||''; const m=cd.match(/filename="?([^";]+)"?/);
+          name=m?m[1]:'merged-compressed-500kb.pdf';
+          warning=resComp.headers.get('X-Warning-Message')||'';
+        }else{
+          const fd=new FormData();
+          files.forEach(f=>fd.append(multi?'files':'file',f));
+          if(target) fd.append('targetSize',target);
+          const res=await fetch(endpointMap[mode],{method:'POST',body:fd});
+          if(!res.ok){let j={}; try{j=await res.json()}catch{} throw new Error(j.message||j.error||`Server returned ${res.status}`)}
+          blob=await res.blob();
+          const cd=res.headers.get('Content-Disposition')||''; const m=cd.match(/filename="?([^";]+)"?/);
+          name=m?m[1]:(mode==='split'||mode==='pdf-to-jpg'?'getpdfpress-output.zip':'getpdfpress-output.pdf');
+          warning=res.headers.get('X-Warning-Message')||'';
+        }
+        blobUrl=URL.createObjectURL(blob);
+        dl.href=blobUrl; dl.download=name;
         original.textContent=fmt(totalIn); final.textContent=fmt(blob.size);
         const pct=Math.max(0,Math.round((1-blob.size/totalIn)*100)); saved.textContent=pct+'%';
         result.classList.add('show');
-        const warning=res.headers.get('X-Warning-Message');
         setStatus(warning||'Done. Download your processed file below.','ok');
         window.getPDFpressDownloadComplete=function(){ if(window.gtag) gtag('event','download_complete',{tool:mode}); };
       }catch(err){setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')}
