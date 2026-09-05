@@ -12,7 +12,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://getpdfpress.com/learn/pdf-compression-vs-quality">
   <meta property="og:image" content="https://getpdfpress.com/og-pdfpress.jpg">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/tailwind.css?v=20260723a" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/tailwind.css?v=20260905b" />
   <!-- ADSENSE (add after approval): paste the AdSense Auto Ads <script> here. -->
   <style>
     .article-content h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #0f172a; }
@@ -23,8 +23,8 @@
     .article-content ul { list-style: disc; }
     .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
   </style>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "PDF Compression vs Quality: What Actually Changes?", "description": "What does PDF compression really do to your file? Text vs images, lossless vs lossy, DPI vs JPEG quality - explained in plain language with practical guidance.", "author": {"@type": "Organization", "name": "getPDFpress"}, "publisher": {"@type": "Organization", "name": "getPDFpress", "url": "https://getpdfpress.com"}, "mainEntityOfPage": "https://getpdfpress.com/learn/pdf-compression-vs-quality", "dateModified": "2026-06-11"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does compressing a PDF make the text blurry?", "acceptedAnswer": {"@type": "Answer", "text": "Not for digitally created text \u2014 it's stored as instructions, not pixels, and stays sharp at every compression level. Text inside scanned pages is an image, though, and can soften under strong compression."}}, {"@type": "Question", "name": "What's the difference between lossless and lossy PDF compression?", "acceptedAnswer": {"@type": "Answer", "text": "Lossless removes waste (metadata, duplicate objects, inefficient packing) with zero quality change but modest savings. Lossy re-encodes images at lower DPI and JPEG quality \u2014 big savings, with a quality trade-off you control."}}, {"@type": "Question", "name": "Why did my PDF get only slightly smaller?", "acceptedAnswer": {"@type": "Answer", "text": "It was probably already optimized: little metadata, efficient images, or mostly text and vector content with nothing heavy to squeeze. That's good news \u2014 it means the file was healthy."}}, {"@type": "Question", "name": "Is 'Strong' compression safe for important documents?", "acceptedAnswer": {"@type": "Answer", "text": "It's safe in that the file stays valid \u2014 but inspect scans at 150% zoom before submitting. For legal, immigration, or financial documents, prefer Gentle/Balanced and split the file if you need a smaller size."}}]}]}</script>
-<script src="/ga.js?v=20260723a" defer></script></head>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"PDF Compression vs Quality: What Actually Changes?","description":"What does PDF compression really do to your file? Text vs images, lossless vs lossy, DPI vs JPEG quality - explained in plain language with practical guidance.","author":{"@type":"Organization","name":"getPDFpress"},"publisher":{"@type":"Organization","name":"getPDFpress","url":"https://getpdfpress.com"},"mainEntityOfPage":"https://getpdfpress.com/learn/pdf-compression-vs-quality","dateModified":"2026-09-05"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does compressing a PDF make the text blurry?","acceptedAnswer":{"@type":"Answer","text":"Not for digitally created text. That text is stored as instructions, not pixels, so it stays sharp at normal compression levels. Text inside a scanned page is part of an image and can soften under strong compression. If your PDF is a camera scan, inspect it carefully after each size reduction."}},{"@type":"Question","name":"What is the difference between lossless and lossy PDF compression?","acceptedAnswer":{"@type":"Answer","text":"Lossless removes waste such as duplicate objects and inefficient packing with no quality change, but savings are often modest. Lossy recompression re-encodes images at lower resolution or JPEG quality for larger savings. getPDFpress steps up only as needed and reports the real outcome instead of promising an exact kilobyte count."}},{"@type":"Question","name":"Why did my PDF get only slightly smaller?","acceptedAnswer":{"@type":"Answer","text":"It was probably already efficient: little metadata, well-encoded images, or mostly text and vectors. That is good news. Further lossy compression may hurt scans without helping much. If you still need a hard portal limit, remove pages or recreate heavy sections as digital text rather than crushing a healthy file."}},{"@type":"Question","name":"Is strong compression safe for important documents?","acceptedAnswer":{"@type":"Answer","text":"The file usually remains a valid PDF, but safety for your use case means a human can still read it. For legal, immigration, or financial paperwork, prefer a milder pass and split the file if you need a smaller size. Always zoom in on seals and signatures before you upload or email the result."}},{"@type":"Question","name":"Which target should I pick for quality versus size?","acceptedAnswer":{"@type":"Answer","text":"Use 500KB for most job and portal uploads. Use 200KB only for stricter forms. Email is often fine under 1MB. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen."}}]}]}</script>
+<script src="/ga.js?v=20260905b" defer></script></head>
 <body class="bg-white text-slate-900">
   <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
@@ -64,7 +64,7 @@
           </div>
         </div>
         <span class="text-slate-300">•</span>
-        <time datetime="2026-06-11">Updated June 11, 2026</time>
+        <time datetime="2026-09-05">Updated September 5, 2026</time>
       </div>
     </header>
 
@@ -73,6 +73,7 @@
       <h2 class="font-bold text-lg mb-2 text-slate-900">Quick answer</h2>
       <p class="text-slate-700 leading-relaxed">PDF compression changes <strong>images, not text</strong>. Text and vector graphics are stored as instructions and stay perfectly sharp at any compression level. Photos and scanned pages are bitmaps, and shrinking them means lowering resolution (DPI) and/or JPEG quality - that's where softness appears. A text-heavy PDF can shrink 90% with zero visible change; a scan trades size against sharpness on a dial.</p>
     </div>
+      <p class="mt-4"><a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Compress PDF to 500KB</a></p>
 
     <!-- Table of contents -->
     <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10">
@@ -117,24 +118,28 @@
     </div>
 
     <!-- FAQs -->
-    <section class="mt-12">
+    <section id="faq" class="mt-12">
       <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
       <div class="space-y-5">
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">Does compressing a PDF make the text blurry?</h3>
-          <p class="text-slate-600 leading-relaxed">Not for digitally created text - it's stored as instructions, not pixels, and stays sharp at every compression level. Text inside scanned pages is an image, though, and can soften under strong compression.</p>
+          <p class="text-slate-600 leading-relaxed">Not for digitally created text. That text is stored as instructions, not pixels, so it stays sharp at normal compression levels. Text inside a scanned page is part of an image and can soften under strong compression. If your PDF is a camera scan, inspect it carefully after each size reduction.</p>
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
-          <h3 class="font-bold mb-2 text-slate-900">What&#x27;s the difference between lossless and lossy PDF compression?</h3>
-          <p class="text-slate-600 leading-relaxed">Lossless removes waste (metadata, duplicate objects, inefficient packing) with zero quality change but modest savings. Lossy re-encodes images at lower DPI and JPEG quality - big savings, with a quality trade-off you control.</p>
+          <h3 class="font-bold mb-2 text-slate-900">What is the difference between lossless and lossy PDF compression?</h3>
+          <p class="text-slate-600 leading-relaxed">Lossless removes waste such as duplicate objects and inefficient packing with no quality change, but savings are often modest. Lossy recompression re-encodes images at lower resolution or JPEG quality for larger savings. getPDFpress steps up only as needed and reports the real outcome instead of promising an exact kilobyte count.</p>
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">Why did my PDF get only slightly smaller?</h3>
-          <p class="text-slate-600 leading-relaxed">It was probably already optimized: little metadata, efficient images, or mostly text and vector content with nothing heavy to squeeze. That's good news - it means the file was healthy.</p>
+          <p class="text-slate-600 leading-relaxed">It was probably already efficient: little metadata, well-encoded images, or mostly text and vectors. That is good news. Further lossy compression may hurt scans without helping much. If you still need a hard portal limit, remove pages or recreate heavy sections as digital text rather than crushing a healthy file.</p>
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
-          <h3 class="font-bold mb-2 text-slate-900">Is &#x27;Strong&#x27; compression safe for important documents?</h3>
-          <p class="text-slate-600 leading-relaxed">It's safe in that the file stays valid - but inspect scans at 150% zoom before submitting. For legal, immigration, or financial documents, prefer Gentle/Balanced and split the file if you need a smaller size.</p>
+          <h3 class="font-bold mb-2 text-slate-900">Is strong compression safe for important documents?</h3>
+          <p class="text-slate-600 leading-relaxed">The file usually remains a valid PDF, but safety for your use case means a human can still read it. For legal, immigration, or financial paperwork, prefer a milder pass and split the file if you need a smaller size. Always zoom in on seals and signatures before you upload or email the result.</p>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-5">
+          <h3 class="font-bold mb-2 text-slate-900">Which target should I pick for quality versus size?</h3>
+          <p class="text-slate-600 leading-relaxed">Use 500KB for most job and portal uploads. Use 200KB only for stricter forms. Email is often fine under 1MB. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen.</p>
         </div>
       </div>
     </section>
