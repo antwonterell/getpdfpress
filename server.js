@@ -331,6 +331,10 @@ app.use(express.static("public", {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     }
+    // Sitemap/robots must not sit behind the 30d static maxAge or Google keeps stale reads.
+    if (filePath.endsWith('sitemap.xml') || filePath.endsWith('robots.txt') || filePath.endsWith('llms.txt')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    }
   }
 }));
 
