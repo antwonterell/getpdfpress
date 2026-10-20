@@ -16,7 +16,7 @@
   const endpointMap={compress:'/api/compress',merge:'/api/merge',split:'/api/split','jpg-to-pdf':'/api/images-to-pdf','pdf-to-jpg':'/api/pdf-to-images-zip','word-to-pdf':'/api/word-to-pdf','pdf-to-word':'/api/pdf-to-word'};
 
   $$('.pdf-tool').forEach(tool=>{
-    const mode=tool.dataset.tool||'compress', target=tool.dataset.target||'', multi=['merge','jpg-to-pdf'].includes(mode);
+    const mode=tool.dataset.tool||'compress', target=tool.dataset.target||'', multi=['merge','merge-compress','jpg-to-pdf'].includes(mode);
     const input=$('.file-input',tool), drop=$('.uploader',tool), btn=$('.run-btn',tool), status=$('.status',tool), result=$('.result',tool);
     const original=$('.original-size',tool), final=$('.final-size',tool), saved=$('.saved-size',tool), dl=$('.download-link',tool), fileName=$('.file-name',tool);
     let files=[], blobUrl=null;
