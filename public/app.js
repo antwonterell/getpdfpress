@@ -19,7 +19,7 @@
     const mode=tool.dataset.tool||'compress', target=tool.dataset.target||'', multi=['merge','merge-compress','jpg-to-pdf'].includes(mode);
     const input=$('.file-input',tool), drop=$('.uploader',tool), btn=$('.run-btn',tool), status=$('.status',tool), result=$('.result',tool);
     const original=$('.original-size',tool), final=$('.final-size',tool), saved=$('.saved-size',tool), dl=$('.download-link',tool), fileName=$('.file-name',tool);
-    let files=[], blobUrl=null;
+    let files=[], blobUrl=null, processing=false;
     fileName.classList.add('file-list');
 
     function setStatus(msg,type=''){status.textContent=msg; status.className='status show '+type;}
@@ -27,6 +27,9 @@
     function ready(){ return (mode==='merge'||mode==='merge-compress') ? files.length>=2 : files.length>=1; }
 
     function render(){
+      result.classList.remove('show');
+      if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl=null; }
+      dl.href='';
       if(!files.length){
         fileName.textContent='No file selected';
       }else{
@@ -44,6 +47,7 @@
     }
 
     function addFiles(list){
+      if(processing) return;
       const incoming=Array.from(list||[]);
       if(!incoming.length) return;
       if(multi){
@@ -60,6 +64,7 @@
       // The chip list sits inside the clickable uploader; without this,
       // removing a file also pops the file picker.
       e.stopPropagation();
+      if(processing) return;
       const x=e.target.closest('.chip-x');
       if(x){ files.splice(Number(x.dataset.i),1); render(); return; }
       if(e.target.closest('.add-more')){ input.click(); }
@@ -85,7 +90,8 @@
 
     const btnLabel=btn.textContent;
     btn.addEventListener('click',async()=>{
-      if(!ready()) return;
+      if(processing || !ready()) return;
+      processing=true;
       if(blobUrl) URL.revokeObjectURL(blobUrl);
       result.classList.remove('show'); btn.disabled=true; btn.textContent='Working…';
       setStatus(mode==='merge-compress'
@@ -130,7 +136,7 @@
         setStatus(warning||'Done. Download your processed file below.','ok');
         window.getPDFpressDownloadComplete=function(){ if(window.gtag) gtag('event','download_complete',{tool:mode}); };
       }catch(err){setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')}
-      finally{hideProgress(); btn.textContent=btnLabel; btn.disabled=!ready();}
+      finally{processing=false; hideProgress(); btn.textContent=btnLabel; btn.disabled=!ready();}
     });
 
     render();

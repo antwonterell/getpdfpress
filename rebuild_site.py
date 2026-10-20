@@ -10,36 +10,8 @@ brand_css = r'''
 '''
 (pub/'output.css').write_text(brand_css)
 
-app_js = r'''
-(function(){
-  const $ = (s, c=document)=>c.querySelector(s);
-  const $$ = (s, c=document)=>Array.from(c.querySelectorAll(s));
-  const fmt = b => !b ? '0 KB' : b < 1024*1024 ? Math.round(b/1024)+' KB' : (b/1024/1024).toFixed(1)+' MB';
-  const endpointMap={compress:'/api/compress',merge:'/api/merge',split:'/api/split','jpg-to-pdf':'/api/images-to-pdf','pdf-to-jpg':'/api/pdf-to-images-zip','word-to-pdf':'/api/word-to-pdf','pdf-to-word':'/api/pdf-to-word'};
-  $$('.pdf-tool').forEach(tool=>{
-    const mode=tool.dataset.tool||'compress', target=tool.dataset.target||'', multi=['merge','jpg-to-pdf'].includes(mode);
-    const input=$('.file-input',tool), drop=$('.uploader',tool), btn=$('.run-btn',tool), status=$('.status',tool), result=$('.result',tool);
-    const original=$('.original-size',tool), final=$('.final-size',tool), saved=$('.saved-size',tool), dl=$('.download-link',tool), fileName=$('.file-name',tool);
-    let files=[], blobUrl=null;
-    function setStatus(msg,type=''){status.textContent=msg; status.className='status show '+type;}
-    function update(){files=Array.from(input.files||[]); fileName.textContent=files.length?files.map(f=>f.name).join(', '):'No file selected'; btn.disabled= mode==='merge'? files.length<2 : files.length<1; if(files.length) setStatus(`${files.length} file${files.length>1?'s':''} ready. Processing is best-effort and exact targets are not guaranteed.`);}
-    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
-    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
-    drop.addEventListener('drop',e=>{input.files=e.dataTransfer.files;update()}); drop.addEventListener('click',()=>input.click()); input.addEventListener('change',update);
-    btn.addEventListener('click',async()=>{
-      if(!files.length) return; if(blobUrl) URL.revokeObjectURL(blobUrl); result.classList.remove('show'); btn.disabled=true; setStatus('Compressing your file now. Larger scanned PDFs can take a moment.');
-      try{const fd=new FormData(); files.forEach(f=>fd.append(mode==='merge'||mode==='jpg-to-pdf'?'files':'file',f)); if(target) fd.append('targetSize',target);
-        const res=await fetch(endpointMap[mode],{method:'POST',body:fd}); if(!res.ok){let j={}; try{j=await res.json()}catch{} throw new Error(j.message||j.error||`Server returned ${res.status}`)}
-        const blob=await res.blob(); blobUrl=URL.createObjectURL(blob); const cd=res.headers.get('Content-Disposition')||''; const m=cd.match(/filename="?([^";]+)"?/); const name=m?m[1]:(mode==='split'||mode==='pdf-to-jpg'?'getpdfpress-output.zip':'getpdfpress-output.pdf');
-        dl.href=blobUrl; dl.download=name; original.textContent=fmt(files.reduce((n,f)=>n+f.size,0)); final.textContent=fmt(blob.size); const pct=Math.max(0,Math.round((1-blob.size/files.reduce((n,f)=>n+f.size,0))*100)); saved.textContent=pct+'%'; result.classList.add('show');
-        const warning=res.headers.get('X-Warning-Message'); setStatus(warning||'Done. Download your processed file below.','ok');
-        window.getPDFpressDownloadComplete=function(){ if(window.gtag) gtag('event','download_complete',{tool:mode}); };
-      }catch(err){setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')} finally{btn.disabled=false;}
-    });
-    update();
-  });
-})();
-'''
+# Keep the maintained uploader as the source of truth.
+app_js = (Path(__file__).resolve().parent / 'public' / 'app.js').read_text(encoding='utf-8')
 (pub/'app.js').write_text(app_js)
 
 header = '''<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="2"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="2"/><path d="M9 13h6M9 17h4" stroke="currentColor" stroke-width="2"/></svg></span><span>getPDFpress</span></a><nav class="nav-links"><a href="/compress-pdf-500kb">500KB</a><a href="/compress-pdf-200kb">200KB</a><a href="/merge-pdf">Merge</a><a href="/split-pdf">Split</a><a href="/learn">Learn</a></nav></div></header>'''
@@ -68,7 +40,7 @@ def make_tool_page(filename, title, desc, h1, lead, tool='compress', target='500
     html=head(title,desc,path)+header+f'''<main><section class="hero"><div class="wrap hero-grid"><div><span class="eyebrow">Simple, honest PDF tools</span><h1 class="h1">{h1}</h1><p class="lead">{lead}</p><div class="trust-row"><span class="pill">Best-effort targets</span><span class="pill">No fake user claims</span><span class="pill">Temporary processing</span></div></div>{tool_box(tool,target)}</div></section><section class="section"><div class="wrap"><h2>Popular PDF tools</h2>{tools_grid()}</div></section><section class="section"><div class="wrap grid cards-3">'''
     for t in tips:
         html+=f'<article class="card"><h3>{t[0]}</h3><p>{t[1]}</p></article>'
-    html+='''</div></section><section class="section"><div class="wrap"><div class="ad-safe"></div></div></section></main>'''+footer+'<script src="/app.js" defer></script></body></html>'
+    html+='''</div></section><section class="section"><div class="wrap"><div class="ad-safe"></div></div></section></main>'''+footer+'<script src="/app.js?v=20261020-upload" defer></script></body></html>'
     (pub/filename).write_text(html)
 
 common_tips=[('Why exact targets vary','PDFs with lots of scanned photos are harder to shrink than text-based PDFs. The tool returns the smallest readable result it can.'),('Best for real upload limits','Use 500KB for many job portals and 200KB or 100KB when a form is strict. Split long PDFs if needed.'),('Privacy note','Files are processed temporarily on the server. Cleanup runs automatically, but you should avoid uploading documents you are not allowed to process.')]
