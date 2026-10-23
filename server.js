@@ -1510,6 +1510,8 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    inputPath = req.file.path;
+
     if (!CONVERTAPI_SECRET) {
       return res.status(501).json({
         error: "Feature not configured",
@@ -1518,11 +1520,10 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
       });
     }
 
-    inputPath = req.file.path;
     const fileBuffer = await fs.readFile(inputPath);
     const base64File = fileBuffer.toString('base64');
 
-    console.log(`📤 Calling ConvertAPI for Word → PDF (${req.file.originalname})`);
+    console.log('Office conversion requested');
 
     // Call ConvertAPI
     const response = await axios.post(
@@ -1544,8 +1545,8 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
       }
     );
 
-    // Log the full response for debugging
-    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+    // Log only non-content diagnostics.
+    console.log('Office provider response', { status: response.status, files: Array.isArray(response.data?.Files) ? response.data.Files.length : 0 });
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];
@@ -1559,7 +1560,7 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
         pdfBytes = Buffer.from(fileInfo.FileData, 'base64');
       } else if (fileInfo.Url) {
         // Fallback to URL download if available
-        console.log('📥 Download URL:', fileInfo.Url);
+
         console.log('⬇️ Downloading converted file...');
         const pdfResponse = await axios.get(fileInfo.Url, { 
           responseType: 'arraybuffer',
@@ -1567,7 +1568,7 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
         });
         pdfBytes = Buffer.from(pdfResponse.data);
       } else {
-        throw new Error(`No FileData or Url in ConvertAPI response: ${JSON.stringify(fileInfo)}`);
+        throw new Error("No file data or download URL in provider response");
       }
 
       console.log(`✅ Word → PDF via ConvertAPI: ${Math.round(pdfBytes.length / 1024)}KB`);
@@ -1580,12 +1581,14 @@ app.post("/api/word-to-pdf", upload.single("file"), requireOffice(), async (req,
 
       res.send(pdfBytes);
     } else {
-      console.error('❌ Invalid ConvertAPI response structure:', response.data);
+      console.error('Office provider returned an invalid response');
       throw new Error("ConvertAPI returned invalid response");
     }
   } catch (error) {
-    console.error("❌ Word to PDF error:", error.message);
-    console.error("❌ Error details:", error.response?.data || error);
+    console.error('Office conversion failed', {
+      status: Number.isInteger(error.response?.status) ? error.response.status : null,
+      code: ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'ENOTFOUND'].includes(error.code) ? error.code : 'CONVERSION_FAILED',
+    });
     const friendly = convertApiFriendlyError(error);
     if (friendly) {
       return res.status(friendly.status).json(friendly.body);
@@ -1622,7 +1625,7 @@ app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, re
     const fileBuffer = await fs.readFile(inputPath);
     const base64File = fileBuffer.toString('base64');
 
-    console.log(`📤 Calling ConvertAPI for PDF → Word (${req.file.originalname})`);
+    console.log('Office conversion requested');
 
     const response = await axios.post(
       `https://v2.convertapi.com/convert/pdf/to/docx?Secret=${CONVERTAPI_SECRET}`,
@@ -1643,8 +1646,8 @@ app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, re
       }
     );
 
-    // Log the full response for debugging
-    console.log('🔍 ConvertAPI Response:', JSON.stringify(response.data, null, 2));
+    // Log only non-content diagnostics.
+    console.log('Office provider response', { status: response.status, files: Array.isArray(response.data?.Files) ? response.data.Files.length : 0 });
 
     if (response.data && response.data.Files && response.data.Files[0]) {
       const fileInfo = response.data.Files[0];
@@ -1658,7 +1661,7 @@ app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, re
         docxBytes = Buffer.from(fileInfo.FileData, 'base64');
       } else if (fileInfo.Url) {
         // Fallback to URL download if available
-        console.log('📥 Download URL:', fileInfo.Url);
+
         console.log('⬇️ Downloading converted file...');
         const docxResponse = await axios.get(fileInfo.Url, { 
           responseType: 'arraybuffer',
@@ -1666,7 +1669,7 @@ app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, re
         });
         docxBytes = Buffer.from(docxResponse.data);
       } else {
-        throw new Error(`No FileData or Url in ConvertAPI response: ${JSON.stringify(fileInfo)}`);
+        throw new Error("No file data or download URL in provider response");
       }
 
       console.log(`✅ PDF → Word via ConvertAPI: ${Math.round(docxBytes.length / 1024)}KB`);
@@ -1679,12 +1682,14 @@ app.post("/api/pdf-to-word", upload.single("file"), requirePdf(), async (req, re
 
       res.send(docxBytes);
     } else {
-      console.error('❌ Invalid ConvertAPI response structure:', response.data);
+      console.error('Office provider returned an invalid response');
       throw new Error("ConvertAPI returned invalid response");
     }
   } catch (error) {
-    console.error("❌ PDF to Word error:", error.message);
-    console.error("❌ Error details:", error.response?.data || error);
+    console.error('Office conversion failed', {
+      status: Number.isInteger(error.response?.status) ? error.response.status : null,
+      code: ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'ENOTFOUND'].includes(error.code) ? error.code : 'CONVERSION_FAILED',
+    });
     const friendly = convertApiFriendlyError(error);
     if (friendly) {
       return res.status(friendly.status).json(friendly.body);
