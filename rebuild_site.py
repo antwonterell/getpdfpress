@@ -40,7 +40,7 @@ def make_tool_page(filename, title, desc, h1, lead, tool='compress', target='500
     html=head(title,desc,path)+header+f'''<main><section class="hero"><div class="wrap hero-grid"><div><span class="eyebrow">Simple, honest PDF tools</span><h1 class="h1">{h1}</h1><p class="lead">{lead}</p><div class="trust-row"><span class="pill">Best-effort targets</span><span class="pill">No fake user claims</span><span class="pill">Temporary processing</span></div></div>{tool_box(tool,target)}</div></section><section class="section"><div class="wrap"><h2>Popular PDF tools</h2>{tools_grid()}</div></section><section class="section"><div class="wrap grid cards-3">'''
     for t in tips:
         html+=f'<article class="card"><h3>{t[0]}</h3><p>{t[1]}</p></article>'
-    html+='''</div></section><section class="section"><div class="wrap"><div class="ad-safe"></div></div></section></main>'''+footer+'<script src="/app.js?v=20261020-upload" defer></script></body></html>'
+    html+='''</div></section><section class="section"><div class="wrap"><div class="ad-safe"></div></div></section></main>'''+footer+'<script src="/app.js?v=20261023-events" defer></script></body></html>'
     (pub/filename).write_text(html)
 
 common_tips=[('Why exact targets vary','PDFs with lots of scanned photos are harder to shrink than text-based PDFs. The tool returns the smallest readable result it can.'),('Best for real upload limits','Use 500KB for many job portals and 200KB or 100KB when a form is strict. Split long PDFs if needed.'),('Privacy note','Files are processed temporarily on the server. Cleanup runs automatically, but you should avoid uploading documents you are not allowed to process.')]

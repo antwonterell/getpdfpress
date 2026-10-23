@@ -22,6 +22,12 @@
     let files=[], blobUrl=null, processing=false;
     fileName.classList.add('file-list');
 
+    // Browser actions/output readiness, never confirmation of an OS save.
+    const analyticsTool=Object.prototype.hasOwnProperty.call(endpointMap,mode)||mode==='merge-compress'?mode:'unknown';
+    function track(event){
+      try{ if(typeof window.gtag==='function') window.gtag('event',event,{tool:analyticsTool}); }catch(_){}
+    }
+
     function setStatus(msg,type=''){status.textContent=msg; status.className='status show '+type;}
 
     function ready(){ return (mode==='merge'||mode==='merge-compress') ? files.length>=2 : files.length>=1; }
@@ -48,6 +54,7 @@
 
     function addFiles(list){
       if(processing) return;
+      const previousCount=files.length;
       const incoming=Array.from(list||[]);
       if(!incoming.length) return;
       if(multi){
@@ -58,6 +65,7 @@
         files=[incoming[0]];
       }
       render();
+      if(!multi||files.length>previousCount) track('file_selected');
     }
 
     fileName.addEventListener('click',e=>{
@@ -92,7 +100,8 @@
     btn.addEventListener('click',async()=>{
       if(processing || !ready()) return;
       processing=true;
-      if(blobUrl) URL.revokeObjectURL(blobUrl);
+      track('processing_started');
+      if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl=null; }
       result.classList.remove('show'); btn.disabled=true; btn.textContent='Working…';
       setStatus(mode==='merge-compress'
         ? 'Step 1 of 2: merging PDFs. Then we compress toward 500KB.'
@@ -134,8 +143,10 @@
         const pct=Math.max(0,Math.round((1-blob.size/totalIn)*100)); saved.textContent=pct+'%';
         result.classList.add('show');
         setStatus(warning||'Done. Download your processed file below.','ok');
-        window.getPDFpressDownloadComplete=function(){ if(window.gtag) gtag('event','download_complete',{tool:mode}); };
-      }catch(err){setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')}
+        track('processing_success');
+        // Keep the HTML callback name; emit only the accurately named click event.
+        window.getPDFpressDownloadComplete=function(){ if(!processing&&blobUrl) track('download_click'); };
+      }catch(err){track('processing_error'); setStatus(err.message||'Something went wrong. Please try a smaller file or a different tool.','err')}
       finally{processing=false; hideProgress(); btn.textContent=btnLabel; btn.disabled=!ready();}
     });
 
