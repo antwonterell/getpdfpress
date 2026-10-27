@@ -2,7 +2,7 @@ services:
   - type: web
     name: getpdfpress
     runtime: docker
-    plan: starter  # $7/month - no sleeping, faster, more reliable
+    plan: 1c-2g # Preserve the existing Standard 1 CPU / 2 GB instance
     branch: main
     autoDeploy: true
     envVars:

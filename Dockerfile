@@ -1,7 +1,7 @@
 # Dockerfile - Production version for Render Starter
 # Optimized, reliable, no bloat
 
-FROM node:18-alpine
+FROM node:24.22.1-alpine3.24
 
 # Environment variables
 # Heap capped at 1536MB: leaves headroom on the 2GB Standard instance for
@@ -11,6 +11,8 @@ ENV HOME=/tmp
 ENV TMPDIR=/tmp
 
 # Install only essential dependencies
+RUN apk add --no-cache --upgrade ca-certificates && update-ca-certificates
+
 RUN apk add --no-cache \
     graphicsmagick \
     ghostscript \
