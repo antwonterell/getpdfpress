@@ -40,7 +40,7 @@
         fileName.textContent='No file selected';
       }else{
         fileName.innerHTML=files.map((f,i)=>`<span class="file-chip"><span class="chip-name">${esc(f.name)}</span><span class="chip-size">${fmt(f.size)}</span><button type="button" class="chip-x" data-i="${i}" aria-label="Remove ${esc(f.name)}">✕</button></span>`).join('')
-          + (multi ? '<span class="chip-break"></span><span class="file-chip add-more">+ Add more</span>' : '');
+          + (multi ? '<span class="chip-break"></span><button type="button" class="file-chip add-more">+ Add more</button>' : '');
       }
       btn.disabled=!ready();
       if(files.length){
@@ -81,7 +81,7 @@
     ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
     ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
     drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
-    drop.addEventListener('click',()=>input.click());
+    drop.addEventListener('click',e=>{ if(!processing && e.target!==input) input.click(); });
     input.addEventListener('change',()=>{addFiles(input.files); input.value='';});
 
     let progressEl=null;
