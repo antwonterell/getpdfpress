@@ -47,3 +47,8 @@ const privacy=fs.readFileSync(path.join(root,'public/privacy.html'),'utf8');
 assert.ok(privacy.includes('roughly an hour')&&privacy.includes('not a guaranteed deletion deadline')&&privacy.includes('Provider processing is subject to its own retention practices'));
 assert.ok(server.includes('const maxAge = 30 * 60 * 1000')&&server.includes('}, 30 * 60 * 1000)'),'Cleanup policy must be revisited when schedule changes');
 for(const f of files){const h=fs.readFileSync(path.join(root,f),'utf8');assert.ok(!h.includes('plain statements when a target cannot be reached readably')&&!h.includes('no daily task limit'),'Shared claims must reflect actual behavior');}
+
+const merged=fs.readFileSync(path.join(root,'public/merge-pdf-to-500kb.html'),'utf8');assert.ok(merged.includes('512,000 bytes')&&merged.includes('500,000 bytes'),'Merge-compress target units missing');
+const guide200=fs.readFileSync(path.join(root,'public/learn/how-to-compress-pdf-to-200kb.html'),'utf8');for(const claim of ['photographs develop visible blocky artifacts before text','3MB to 5MB','the content itself is the limit'])assert.ok(!guide200.includes(claim));
+const home=fs.readFileSync(path.join(root,'public/index.html'),'utf8');assert.ok(home.includes('You can try'));
+const notes=fs.readFileSync(path.join(root,'public/test-results/README.md'),'utf8');assert.ok(notes.includes('No application checkout is needed')&&notes.includes('cannot independently verify')&&notes.includes('Maintainer-only'));

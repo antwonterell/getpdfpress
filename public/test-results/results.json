@@ -22,12 +22,12 @@
       "textEqual": true,
       "outputImages": 0,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ]
     },
     {
@@ -51,12 +51,12 @@
       "textEqual": true,
       "outputImages": 0,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ]
     },
     {
@@ -80,12 +80,12 @@
       "textEqual": false,
       "outputImages": 2,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        465.0,
-        602.0
+        465,
+        602
       ]
     },
     {
@@ -109,12 +109,12 @@
       "textEqual": false,
       "outputImages": 2,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        664.0,
-        860.0
+        664,
+        860
       ]
     },
     {
@@ -138,12 +138,12 @@
       "textEqual": true,
       "outputImages": 101,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ]
     },
     {
@@ -167,20 +167,20 @@
       "textEqual": true,
       "outputImages": 101,
       "inputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ],
       "outputPageSizePoints": [
-        612.0,
-        792.0
+        612,
+        792
       ]
     }
   ],
   "clientNode": "v24.18.0",
   "testWindowUTC": "2026-11-10T02:16:36Z/2026-11-10T02:17:15Z",
   "sourceRevision": "1dd1d3e0f981ada21d27590f0beed4c5edba4342",
-  "revisionEvidence": "Inspected repository main was 1dd1d3e0f981ada21d27590f0beed4c5edba4342. Active production backend commit and provider billing telemetry were not independently verified.",
-  "methodology": "Six sequential real production /api/compress requests. Inputs were selected to avoid ConvertAPI under the inspected source: small input already below target, other inputs above 10 MiB. Response methods were original, pdf-to-images and pdf-lib. Response methods alone do not prove no provider request occurred. No Word conversion, purchase or top-up was initiated. No mocked outputs.",
+  "revisionEvidence": "Inspected repository main was 1dd1d3e0f981ada21d27590f0beed4c5edba4342. Active production backend commit were not independently verified.",
+  "methodology": "Six sequential real production /api/compress requests. Inputs were selected to avoid ConvertAPI under the inspected source: small input already below target, other inputs above 10 MiB. Response methods were original, pdf-to-images and pdf-lib. Reported methods do not independently verify every processing step. No dedicated ConvertAPI or Word conversion tests were run. No mocked outputs.",
   "verificationEnvironment": {
     "python": "3.12.14",
     "reportlab": "4.4.9",
@@ -195,6 +195,6 @@
     "The high-detail image is seeded random color pixels plus live text, not a scanned real document.",
     "Rasterization removed selectable text and changed page dimensions; no OCR, form, signature, accessibility or print fidelity guarantee.",
     "Output hashes can change with PDF timestamps or software versions.",
-    "No dedicated ConvertAPI/Word conversion tests, browser UI tests, or private-document tests were run. Active deployment revision and provider billing telemetry were not independently verified."
+    "These six compression measurements did not independently test ConvertAPI or Word conversion and were not end-to-end browser UI tests. Separate isolated UI tests used synthetic responses to check reporting behavior; they do not validate compression. No private-document tests were run. The active backend revision was not independently verified."
   ]
 }
