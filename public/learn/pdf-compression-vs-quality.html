@@ -23,7 +23,7 @@
     .article-content ul { list-style: disc; }
     .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
   </style>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"PDF Compression vs Quality: What Actually Changes?","description":"What does PDF compression really do to your file? Text vs images, lossless vs lossy, DPI vs JPEG quality - explained in plain language with practical guidance.","author":{"@type":"Organization","name":"getPDFpress"},"publisher":{"@type":"Organization","name":"getPDFpress","url":"https://getpdfpress.com"},"mainEntityOfPage":"https://getpdfpress.com/learn/pdf-compression-vs-quality","dateModified":"2026-09-05"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does compressing a PDF make the text blurry?","acceptedAnswer":{"@type":"Answer","text":"It can. Native rewriting may preserve digital text, but an image-based fallback can rasterize whole pages, affecting clarity and text selection. Scanned text can also soften. Compare the output with the original, including small print and signatures."}},{"@type":"Question","name":"What is the difference between lossless and lossy PDF compression?","acceptedAnswer":{"@type":"Answer","text":"Lossless removes waste such as duplicate objects and inefficient packing with no quality change, but savings are often modest. Lossy recompression re-encodes images at lower resolution or JPEG quality for larger savings. getPDFpress steps up only as needed and reports the real outcome instead of promising an exact kilobyte count."}},{"@type":"Question","name":"Why did my PDF get only slightly smaller?","acceptedAnswer":{"@type":"Answer","text":"It was probably already efficient: little metadata, well-encoded images, or mostly text and vectors. That is good news. Further lossy compression may hurt scans without helping much. If you still need a hard portal limit, remove pages or recreate heavy sections as digital text rather than crushing a healthy file."}},{"@type":"Question","name":"Is strong compression safe for important documents?","acceptedAnswer":{"@type":"Answer","text":"The file usually remains a valid PDF, but safety for your use case means a human can still read it. For legal, immigration, or financial paperwork, prefer a milder pass and split the file if you need a smaller size. Always zoom in on seals and signatures before you upload or email the result."}},{"@type":"Question","name":"Which target should I pick for quality versus size?","acceptedAnswer":{"@type":"Answer","text":"Use the receiving service's stated limit when choosing a target. Use 200KB only for stricter forms. Email is often fine under 1MB. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen."}}]}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"PDF Compression vs Quality: What Actually Changes?","description":"What does PDF compression really do to your file? Text vs images, lossless vs lossy, DPI vs JPEG quality - explained in plain language with practical guidance.","author":{"@type":"Organization","name":"getPDFpress"},"publisher":{"@type":"Organization","name":"getPDFpress","url":"https://getpdfpress.com"},"mainEntityOfPage":"https://getpdfpress.com/learn/pdf-compression-vs-quality","dateModified":"2026-11-10"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does compressing a PDF make the text blurry?","acceptedAnswer":{"@type":"Answer","text":"It can. Native rewriting may preserve digital text, but an image-based fallback can rasterize whole pages, affecting clarity and text selection. Scanned text can also soften. Compare the output with the original, including small print and signatures."}},{"@type":"Question","name":"What is the difference between lossless and lossy PDF compression?","acceptedAnswer":{"@type":"Answer","text":"Lossless removes waste such as duplicate objects and inefficient packing with no quality change, but savings are often modest. Lossy recompression re-encodes images at lower resolution or JPEG quality for larger savings. getPDFpress steps up only as needed and reports the real outcome instead of promising an exact kilobyte count."}},{"@type":"Question","name":"Why did my PDF get only slightly smaller?","acceptedAnswer":{"@type":"Answer","text":"It was probably already efficient: little metadata, well-encoded images, or mostly text and vectors. That is good news. Further lossy compression may hurt scans without helping much. If you still need a hard portal limit, remove pages or recreate heavy sections as digital text rather than crushing a healthy file."}},{"@type":"Question","name":"Is strong compression safe for important documents?","acceptedAnswer":{"@type":"Answer","text":"A valid PDF is not proof of usable content. Compare all required text, marks and pages with the original. Split only when the recipient allows separate files. Preserve original signed or interactive documents because compression may affect those features."}},{"@type":"Question","name":"Which target should I pick for quality versus size?","acceptedAnswer":{"@type":"Answer","text":"Use the receiving service's stated limit when choosing a target. Use 200KB only for stricter forms. Email requirements also depend on the sending service and recipient. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen."}}]}]}</script>
 <script src="/ga.js?v=20260905b" defer></script></head>
 <body class="bg-white text-slate-900">
   <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
@@ -64,7 +64,7 @@
           </div>
         </div>
         <span class="text-slate-300">•</span>
-        <time datetime="2026-09-05">Updated September 5, 2026</time>
+        <time datetime="2026-11-10">Updated November 10, 2026</time>
       </div>
     </header>
 
@@ -90,8 +90,8 @@
     <div class="article-content">
 
       <h2 id="two-kinds">The two kinds of content inside every PDF</h2>
-      <p>Every PDF mixes two fundamentally different things. <strong>Text and vector graphics</strong> are stored as instructions - "draw the letter A in this font at this position" - which take almost no space and render razor-sharp at any zoom. <strong>Images</strong> (photos, logos saved as bitmaps, and every page of a scanned document) are grids of pixels, and they're where virtually all the megabytes live.</p>
-      <p>This is the single most useful fact about PDF size: when a file is big, it's the images. When compression "ruins" a file, it's the images. Text is essentially a bystander.</p>
+      <p>A PDF can contain text objects, vector graphics, page images, embedded fonts and other resources. These use space differently. Native rewriting can retain text objects, while a whole-page image fallback replaces them with pixels and can remove text selection. File size alone cannot reveal which content dominates.</p>
+      <p>Text is part of the quality check too. A rasterized page may look readable while losing searchable or selectable text, so test both appearance and text selection.</p>
 
       <h2 id="lossless">Lossless tricks: free savings</h2>
       <p>The first attempt rewrites the PDF with a native library and object streams. Savings depend on the document. This is not a metadata-sanitization tool, and it does not guarantee removal of edit history or duplicate resources. The public compressor has no Auto mode.</p>
@@ -99,7 +99,7 @@
       <h2 id="lossy">Lossy compression: the quality dial</h2>
       <p>Real size reduction on image-heavy files comes from two lossy levers:</p>
       <ul>
-        <li><strong>Resolution (DPI):</strong> how many pixels represent each inch of page. Dropping a 300 DPI scan to 150 DPI quarters the pixel count. Text remains readable surprisingly far down; fine print suffers first.</li>
+        <li><strong>Resolution (DPI):</strong> how many pixels represent each inch of page. Dropping a 300 DPI scan to 150 DPI quarters the pixel count. Readability still depends on the original and the output; inspect fine print rather than inferring quality from pixel count.</li>
         <li><strong>JPEG quality:</strong> how aggressively each image is approximated. Higher quality settings generally retain more detail; visible differences depend on the image. Low settings can show blocky artifacts, especially around letters.</li>
       </ul>
       <p>getPDFpress uses fixed-target pages, including 500KB and 200KB, rather than a Gentle, Balanced, or Strong selector. Its server may try different image settings internally. Users cannot select those settings, and the result still needs a visual check.</p>
@@ -109,7 +109,7 @@
         <li><strong>Typed document exported from Word:</strong> a native rewrite may leave text intact, but an image-based fallback can affect text clarity and selection. Keep the original and compare the output.</li>
         <li><strong>Resume with a headshot:</strong> check both the photo and the smallest text. A smaller result does not prove that text remains selectable or readable.</li>
         <li><strong>Color scan of a certificate:</strong> inspect stamps, signatures, and small print after processing. Return to the original if important details become unclear.</li>
-        <li><strong>Photo album PDF:</strong> every page is a photo; expect a visible (if modest) quality trade at small targets.</li>
+        <li><b>Photo album PDF:</b> compare image detail at the intended viewing size. A small target may introduce visible artifacts, and there is no fixed amount of quality loss.</li>
       </ul>
 
       <h2 id="choosing">Choosing a compression level with confidence</h2>
@@ -135,11 +135,11 @@
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">Is strong compression safe for important documents?</h3>
-          <p class="text-slate-600 leading-relaxed">The file usually remains a valid PDF, but safety for your use case means a human can still read it. For legal, immigration, or financial paperwork, prefer a milder pass and split the file if you need a smaller size. Always zoom in on seals and signatures before you upload or email the result.</p>
+          <p class="text-slate-600 leading-relaxed">A valid PDF is not proof of usable content. Compare all required text, marks and pages with the original. Split only when the recipient allows separate files. Preserve original signed or interactive documents because compression may affect those features.</p>
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">Which target should I pick for quality versus size?</h3>
-          <p class="text-slate-600 leading-relaxed">Use the receiving service's stated limit when choosing a target. Use 200KB only for stricter forms. Email is often fine under 1MB. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen.</p>
+          <p class="text-slate-600 leading-relaxed">Use the receiving service's stated limit when choosing a target. Use 200KB only for stricter forms. Email requirements also depend on the sending service and recipient. Pick the largest target that still clears the rule so you keep more detail, then verify readability instead of chasing the smallest number on the screen.</p>
         </div>
       </div>
     </section>
@@ -181,10 +181,10 @@
 
     <div class="mt-16 text-center p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
       <h2 class="text-3xl font-bold mb-4">Ready to get under the limit?</h2>
-      <p class="text-lg text-slate-600 mb-8">getPDFpress is free, fast, and works on any device. No signup.</p>
+      <p class="text-lg text-slate-600 mb-8">getPDFpress is free to use through a compatible browser. No signup.</p>
       <a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-bold hover:bg-blue-700 transition">Try the compressor →</a>
     </div>
-  </article>
+  <h2>A repeatable output-quality check</h2><p>Compare page count and order with the original. At 100% zoom, read the smallest text and inspect thin lines; zoom in on signatures and stamps. Select and copy a sentence into plain text, then check its characters and reading order. A readable image can still have no selectable text. For deciding whether compression is necessary at all, see <a href="/learn/compress-pdf-without-losing-quality">the preserve-quality guide</a>.</p></article>
 
   <footer class="bg-slate-900 text-white py-12 mt-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">

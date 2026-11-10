@@ -11,7 +11,20 @@
 
   const $ = (s, c=document)=>c.querySelector(s);
   const $$ = (s, c=document)=>Array.from(c.querySelectorAll(s));
-  const fmt = b => !b ? '0 KB' : b < 1024*1024 ? Math.round(b/1024)+' KB' : (b/1024/1024).toFixed(1)+' MB';
+  // BEGIN result-reporting: pure helpers covered by scripts/check-content.cjs.
+  const fmt = b => Number(b).toLocaleString('en-US')+' bytes ('+(Number(b)/1024).toFixed(2)+' KiB)';
+  const resultChange = (before, after) => {
+    if(after===before) return 'Unchanged';
+    const percent=(Math.abs(after-before)/before*100).toFixed(1);
+    return percent+'% '+(after<before?'smaller':'larger');
+  };
+  const targetWarning = (mode, target, bytes) => {
+    if(!['compress','merge-compress'].includes(mode)) return '';
+    const limit=Number(target || (mode==='merge-compress'?'500':0))*1024;
+    return limit>0 && bytes>limit
+      ? 'Target missed: '+fmt(bytes)+' exceeds '+limit.toLocaleString('en-US')+' bytes. The best-effort download is still available. Check the receiving service limit and readability.' : '';
+  };
+  // END result-reporting
   const esc = s => s.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
   const endpointMap={compress:'/api/compress',merge:'/api/merge',split:'/api/split','jpg-to-pdf':'/api/images-to-pdf','pdf-to-jpg':'/api/pdf-to-images-zip','word-to-pdf':'/api/word-to-pdf','pdf-to-word':'/api/pdf-to-word'};
 
@@ -81,7 +94,7 @@
     ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
     ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
     drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
-    drop.addEventListener('click',e=>{ if(!processing && e.target!==input) input.click(); });
+    drop.addEventListener('click',e=>{ if(!processing && e.target!==input && !e.target.closest('a')) input.click(); });
     input.addEventListener('change',()=>{addFiles(input.files); input.value='';});
 
     let progressEl=null;
@@ -140,9 +153,10 @@
         blobUrl=URL.createObjectURL(blob);
         dl.href=blobUrl; dl.download=name;
         original.textContent=fmt(totalIn); final.textContent=fmt(blob.size);
-        const pct=Math.max(0,Math.round((1-blob.size/totalIn)*100)); saved.textContent=pct+'%';
+        saved.textContent=resultChange(totalIn,blob.size);
         result.classList.add('show');
-        setStatus(warning||'Done. Download your processed file below.','ok');
+        const strictWarning=targetWarning(mode,target,blob.size);
+        setStatus([strictWarning,warning].filter(Boolean).join(' ')||'Done. Download your processed file below. Check readability and the receiving service limit.','ok');
         track('processing_success');
         // Keep the HTML callback name; emit only the accurately named click event.
         window.getPDFpressDownloadComplete=function(){ if(!processing&&blobUrl) track('download_click'); };

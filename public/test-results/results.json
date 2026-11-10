@@ -1,0 +1,200 @@
+{
+  "date": "2026-11-10",
+  "results": [
+    {
+      "fixture": "born-digital",
+      "targetKB": 200,
+      "targetBytes": 204800,
+      "inputBytes": 1151,
+      "outputBytes": 1151,
+      "inputPages": 1,
+      "outputPages": 1,
+      "method": "original",
+      "reportedMiss": false,
+      "strictTargetMet": true,
+      "identicalBytes": true,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "born-digital-200kb.pdf",
+      "inputSHA256": "6bbfa23597cc3009d54c60a9b73ce5a11bac22a362e184cc4215e1204b6ee9dd",
+      "outputSHA256": "6bbfa23597cc3009d54c60a9b73ce5a11bac22a362e184cc4215e1204b6ee9dd",
+      "inputTextCharacters": 283,
+      "outputTextCharacters": 283,
+      "textEqual": true,
+      "outputImages": 0,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        612.0,
+        792.0
+      ]
+    },
+    {
+      "fixture": "born-digital",
+      "targetKB": 500,
+      "targetBytes": 512000,
+      "inputBytes": 1151,
+      "outputBytes": 1151,
+      "inputPages": 1,
+      "outputPages": 1,
+      "method": "original",
+      "reportedMiss": false,
+      "strictTargetMet": true,
+      "identicalBytes": true,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "born-digital-500kb.pdf",
+      "inputSHA256": "6bbfa23597cc3009d54c60a9b73ce5a11bac22a362e184cc4215e1204b6ee9dd",
+      "outputSHA256": "6bbfa23597cc3009d54c60a9b73ce5a11bac22a362e184cc4215e1204b6ee9dd",
+      "inputTextCharacters": 283,
+      "outputTextCharacters": 283,
+      "textEqual": true,
+      "outputImages": 0,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        612.0,
+        792.0
+      ]
+    },
+    {
+      "fixture": "image-heavy",
+      "targetKB": 200,
+      "targetBytes": 204800,
+      "inputBytes": 14698148,
+      "outputBytes": 66963,
+      "inputPages": 2,
+      "outputPages": 2,
+      "method": "pdf-to-images",
+      "reportedMiss": false,
+      "strictTargetMet": true,
+      "identicalBytes": false,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "image-heavy-200kb.pdf",
+      "inputSHA256": "476495070f0eba518588c3a498a7353c4d14400ceb73f482146b27bf164283db",
+      "outputSHA256": "75cc05c2e9a2f926774e3628f68ddb6ed7d2a0c9f69133ca75f71a5699fc737a",
+      "inputTextCharacters": 566,
+      "outputTextCharacters": 0,
+      "textEqual": false,
+      "outputImages": 2,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        465.0,
+        602.0
+      ]
+    },
+    {
+      "fixture": "image-heavy",
+      "targetKB": 500,
+      "targetBytes": 512000,
+      "inputBytes": 14698148,
+      "outputBytes": 178842,
+      "inputPages": 2,
+      "outputPages": 2,
+      "method": "pdf-to-images",
+      "reportedMiss": false,
+      "strictTargetMet": true,
+      "identicalBytes": false,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "image-heavy-500kb.pdf",
+      "inputSHA256": "476495070f0eba518588c3a498a7353c4d14400ceb73f482146b27bf164283db",
+      "outputSHA256": "9fd0ae8f08c50a89d9e87f3c0666d28a5283f6ba63d77d984ebbbb74e593c53b",
+      "inputTextCharacters": 566,
+      "outputTextCharacters": 0,
+      "textEqual": false,
+      "outputImages": 2,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        664.0,
+        860.0
+      ]
+    },
+    {
+      "fixture": "long-document",
+      "targetKB": 200,
+      "targetBytes": 204800,
+      "inputBytes": 14770858,
+      "outputBytes": 14741758,
+      "inputPages": 101,
+      "outputPages": 101,
+      "method": "pdf-lib",
+      "reportedMiss": true,
+      "strictTargetMet": false,
+      "identicalBytes": false,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "long-document-200kb.pdf",
+      "inputSHA256": "277ccac43e665bcf4e851a10a895527eb5ba06d7c336ac015725c8d897675dd7",
+      "outputSHA256": "e8e4a78710838f99961b0691af10d5c08bc8c32185e7b0eded73e3ace7cd8caa",
+      "inputTextCharacters": 28959,
+      "outputTextCharacters": 28959,
+      "textEqual": true,
+      "outputImages": 101,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        612.0,
+        792.0
+      ]
+    },
+    {
+      "fixture": "long-document",
+      "targetKB": 500,
+      "targetBytes": 512000,
+      "inputBytes": 14770858,
+      "outputBytes": 14741758,
+      "inputPages": 101,
+      "outputPages": 101,
+      "method": "pdf-lib",
+      "reportedMiss": true,
+      "strictTargetMet": false,
+      "identicalBytes": false,
+      "source": "production; intended free route under inspected source, active backend commit not independently verified",
+      "filename": "long-document-500kb.pdf",
+      "inputSHA256": "277ccac43e665bcf4e851a10a895527eb5ba06d7c336ac015725c8d897675dd7",
+      "outputSHA256": "0fd9a93af4e0d0f9d0aad2724ab83589f93df51a85ab6fce571bd87d0c25996b",
+      "inputTextCharacters": 28959,
+      "outputTextCharacters": 28959,
+      "textEqual": true,
+      "outputImages": 101,
+      "inputPageSizePoints": [
+        612.0,
+        792.0
+      ],
+      "outputPageSizePoints": [
+        612.0,
+        792.0
+      ]
+    }
+  ],
+  "clientNode": "v24.18.0",
+  "testWindowUTC": "2026-11-10T02:16:36Z/2026-11-10T02:17:15Z",
+  "sourceRevision": "1dd1d3e0f981ada21d27590f0beed4c5edba4342",
+  "revisionEvidence": "Inspected repository main was 1dd1d3e0f981ada21d27590f0beed4c5edba4342. Active production backend commit and provider billing telemetry were not independently verified.",
+  "methodology": "Six sequential real production /api/compress requests. Inputs were selected to avoid ConvertAPI under the inspected source: small input already below target, other inputs above 10 MiB. Response methods were original, pdf-to-images and pdf-lib. Response methods alone do not prove no provider request occurred. No Word conversion, purchase or top-up was initiated. No mocked outputs.",
+  "verificationEnvironment": {
+    "python": "3.12.14",
+    "reportlab": "4.4.9",
+    "Pillow": "13.0.0",
+    "pypdf": "6.10.0",
+    "poppler": "26.07.0",
+    "pdf-lib": "1.17.1"
+  },
+  "visualReview": "Representative first pages were rendered at 96 dpi and at equal 816-pixel full-page width; last page 101 was inspected. Text extraction and page/image counts were checked across all pages. At equal page width, the 200KB result's 6-point line is not reliably readable; the 500KB result has clearer 10/12-point lines but softened fine text. No automatic readability score or all-page visual audit.",
+  "limitations": [
+    "Three deliberately constructed fixtures, not a representative workload or expected savings.",
+    "The high-detail image is seeded random color pixels plus live text, not a scanned real document.",
+    "Rasterization removed selectable text and changed page dimensions; no OCR, form, signature, accessibility or print fidelity guarantee.",
+    "Output hashes can change with PDF timestamps or software versions.",
+    "No dedicated ConvertAPI/Word conversion tests, browser UI tests, or private-document tests were run. Active deployment revision and provider billing telemetry were not independently verified."
+  ]
+}

@@ -23,7 +23,7 @@
     .article-content ul { list-style: disc; }
     .article-content li { margin-bottom: 0.5rem; line-height: 1.75; color: #475569; }
   </style>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Compress a Scanned PDF Without Making It Unreadable","description":"Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.","author":{"@type":"Organization","name":"getPDFpress"},"publisher":{"@type":"Organization","name":"getPDFpress","url":"https://getpdfpress.com"},"mainEntityOfPage":"https://getpdfpress.com/learn/compress-scanned-pdf-readable","dateModified":"2026-09-05"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why does my scanned PDF barely compress?","acceptedAnswer":{"@type":"Answer","text":"It may already be optimized. Previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos with large margins. Crop, convert unnecessary color to grayscale, then compress once and proofread the result."}},{"@type":"Question","name":"What DPI should I scan documents at?","acceptedAnswer":{"@type":"Answer","text":"300 DPI is a safe standard for important paperwork. For many text pages, 150-200 DPI stays readable and is much smaller. Going above 300 DPI for ordinary letters mostly adds file size without helping a reviewer. Match DPI to the use case instead of always choosing the maximum setting."}},{"@type":"Question","name":"Is black-and-white scanning a good idea?","acceptedAnswer":{"@type":"Answer","text":"Sometimes. Pure black-and-white can make tiny files with crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default for mixed documents. After scanning, compress toward your upload target and confirm every mark you need is still visible."}},{"@type":"Question","name":"Can OCR reduce my scan file size?","acceptedAnswer":{"@type":"Answer","text":"OCR adds a text layer for searching. By itself it does not shrink the page images. Some tools re-encode images while running OCR, which can reduce size as a side effect, but you should treat OCR as a readability feature. For upload limits, crop, grayscale, and image compression matter more."}},{"@type":"Question","name":"How do I keep a scan readable at 500KB or 200KB?","acceptedAnswer":{"@type":"Answer","text":"Start with fewer pages and a sensible DPI. Compress toward 500KB first, then 200KB only if required. Open the result and read a full line of text. If letters smear, stop and split the document rather than forcing another aggressive pass that a reviewer cannot use."}}]}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Compress a Scanned PDF Without Making It Unreadable","description":"Scanned PDFs are images in disguise. Learn the DPI, color, and compression settings that shrink scans while keeping signatures and fine print legible.","author":{"@type":"Organization","name":"getPDFpress"},"publisher":{"@type":"Organization","name":"getPDFpress","url":"https://getpdfpress.com"},"mainEntityOfPage":"https://getpdfpress.com/learn/compress-scanned-pdf-readable","dateModified":"2026-11-10"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why does my scanned PDF barely compress?","acceptedAnswer":{"@type":"Answer","text":"It may already be optimized. Previously compressed scans, screenshot PDFs, and web captures often have little left to squeeze. The biggest gains come from high-DPI color scans and camera photos with large margins. Crop, convert unnecessary color to grayscale, then compress once and proofread the result."}},{"@type":"Question","name":"What DPI should I scan documents at?","acceptedAnswer":{"@type":"Answer","text":"Follow the receiving service's resolution requirements. If none are stated, test more than one setting on a copy and inspect the smallest writing, stamps and signatures. DPI alone does not guarantee readability or a particular file size."}},{"@type":"Question","name":"Is black-and-white scanning a good idea?","acceptedAnswer":{"@type":"Answer","text":"Sometimes. Pure black-and-white can make tiny files with crisp typed text, but it can erase light pencil, faded stamps, and subtle seals. Grayscale is the safer default for mixed documents. After scanning, compress toward your upload target and confirm every mark you need is still visible."}},{"@type":"Question","name":"Can OCR reduce my scan file size?","acceptedAnswer":{"@type":"Answer","text":"OCR adds a text layer for searching. By itself it does not shrink the page images. Some tools re-encode images while running OCR, which can reduce size as a side effect, but you should treat OCR as a readability feature. For upload limits, crop, grayscale, and image compression matter more."}},{"@type":"Question","name":"How do I keep a scan readable at 500KB or 200KB?","acceptedAnswer":{"@type":"Answer","text":"Keep every required page. Choose a target that fits the stated limit, then inspect the smallest writing and marks. If the result is unclear, improve the source or split only when separate uploads are allowed."}}]}]}</script>
 <script src="/ga.js?v=20260905b" defer></script></head>
 <body class="bg-white text-slate-900">
   <nav class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 z-50 shadow-sm">
@@ -64,14 +64,14 @@
           </div>
         </div>
         <span class="text-slate-300">•</span>
-        <time datetime="2026-09-05">Updated September 5, 2026</time>
+        <time datetime="2026-11-10">Updated November 10, 2026</time>
       </div>
     </header>
 
     <!-- Quick answer -->
     <div class="bg-blue-50 border-l-4 border-blue-600 rounded-r-xl p-6 mb-10">
       <h2 class="font-bold text-lg mb-2 text-slate-900">Quick answer</h2>
-      <p class="text-slate-700 leading-relaxed">Scans are photos of paper, so they compress like photos: quality trades off against size. The recipe that preserves readability: scan (or keep) <strong>grayscale at 150-300 DPI</strong>, use the <strong>target-size tool required by your portal</strong>, and always inspect signatures and fine print at 150% zoom before submitting. If you must hit a very small target like 200KB, reduce pages or re-scan rather than crushing quality.</p>
+      <p class="text-slate-700 leading-relaxed">Scans store page images, so reducing their size can lose detail. Keep the original, follow the recipient's requirements, and inspect fine print, signatures and stamps in the output. Split only when separate files are allowed; keep all required pages.</p>
     </div>
       <p class="mt-4"><a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Compress a scanned PDF</a></p>
 
@@ -90,14 +90,14 @@
     <div class="article-content">
 
       <h2 id="why">Why scanned PDFs behave differently</h2>
-      <p>A digitally created PDF stores text as text - tiny, infinitely sharp, and almost free to compress. A scanned PDF stores each page as a picture. Every compression decision is therefore an image-quality decision: push too hard and letters smear, stamps blur, and signatures turn to mush.</p>
-      <p>This is why a 3-page scan can be 6MB while a 300-page ebook is 2MB. It's also why "compress to 200KB" is easy for a contract typed in Word and genuinely hard for the same contract scanned in color at 600 DPI.</p>
+      <p>Digital PDFs can store text as objects; scans contain page images and may also have an OCR text layer. Recompressing images or rasterizing pages can affect both visual detail and selectability. Keep the original and evaluate the actual output.</p>
+      <p>A scan and a digital export of similar-looking pages can have very different sizes. Neither a page count nor the fact that a document contains digital text guarantees a 200KB result.</p>
 
       <h2 id="sweet-spot">The readability sweet spot: DPI, color, quality</h2>
       <ul>
-        <li><strong>DPI:</strong> 300 DPI is the common standard for document scanning; 150-200 DPI is usually still perfectly readable and roughly 2-4× smaller. Below ~120 DPI, small print degrades quickly.</li>
-        <li><strong>Color:</strong> Grayscale cuts size to roughly a third of color. Black-and-white (1-bit) is smaller still but can destroy pencil marks and light stamps - test first.</li>
-        <li><strong>JPEG quality:</strong> The invisible dial inside most compressors. Down to moderate quality, text stays readable; at very low quality you'll see blocky artifacts around letters.</li>
+        <li><b>DPI:</b> test resolution settings against the smallest writing and required marks. Lower resolution reduces pixels, but there is no universal readable threshold or fixed savings ratio. Follow any resolution requirement from the recipient.</li>
+        <li><b>Color:</b> grayscale or black and white may reduce size, but can remove meaningful color or faint marks. Use them only when permitted, then compare the scan with the original.</li>
+        <li><b>JPEG quality:</b> lower settings can introduce artifacts around letters and thin lines. The public tools choose settings internally; inspect the result rather than assuming a quality label proves readability.</li>
       </ul>
 
       <h2 id="workflow">A safe compression workflow</h2>
@@ -105,14 +105,14 @@
         <li>Upload to the <a href="/compress-pdf-500kb" class="text-blue-600 hover:underline">compressor</a> and choose your portal's target.</li>
         <li>Open the 500KB or 200KB tool that matches your requirement. Upload the PDF and press Compress; there is no Gentle, Balanced, or Strong selector.</li>
         <li>Download the result and inspect small text, stamps, and signatures. The tool reports size, but you must assess readability yourself.</li>
-        <li>If the result still exceeds the required limit or loses needed detail, <a href="/split-pdf" class="text-blue-600 hover:underline">split the document</a> or remove non-essential pages, then compress the smaller piece.</li>
+        <li>If the result exceeds the limit or loses required detail, improve the source. Split only if separate uploads are allowed, and remove only pages that are not required.</li>
       </ol>
 
       <h2 id="rescue">Rescuing a scan that won't compress</h2>
-      <p>Some scans arrive broken: skewed, low-contrast phone photos at odd angles. If compression keeps failing, fix the source instead. Re-scan flat on a scanner (or with a scanning app that de-skews), choose grayscale, 150-200 DPI. If you only have a paper copy and a phone, take photos in bright, even light, directly overhead - then convert with <a href="/jpg-to-pdf" class="text-blue-600 hover:underline">JPG to PDF</a>, which also optimizes the images.</p>
+      <p>Skewed or low-contrast source images need source improvements, not just more compression. Rescan in even light with the camera parallel to the page. Test settings on a copy and preserve all required edges, color and marks.</p>
 
       <h2 id="verify">How to verify readability before submitting</h2>
-      <p>Open the compressed PDF and zoom to 150%. Check the smallest text on the page, every signature, every stamp or seal, and any handwriting. If you have to squint, the reviewer will too - and for government or legal submissions, an unreadable document can mean rejection or a request to resubmit. When in doubt, choose the bigger, clearer file and split the document to meet the limit.</p>
+      <p>Open the original and output side by side at 100% zoom, then zoom further to inspect faint writing, stamps and signatures. If details are lost, keep the clearer source and improve it or ask about accepted alternatives. Split only when separate files are permitted.</p>
  
     </div>
 
@@ -126,7 +126,7 @@
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">What DPI should I scan documents at?</h3>
-          <p class="text-slate-600 leading-relaxed">300 DPI is a safe standard for important paperwork. For many text pages, 150-200 DPI stays readable and is much smaller. Going above 300 DPI for ordinary letters mostly adds file size without helping a reviewer. Match DPI to the use case instead of always choosing the maximum setting.</p>
+          <p class="text-slate-600 leading-relaxed">Follow the receiving service's resolution requirements. If none are stated, test more than one setting on a copy and inspect the smallest writing, stamps and signatures. DPI alone does not guarantee readability or a particular file size.</p>
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">Is black-and-white scanning a good idea?</h3>
@@ -138,7 +138,7 @@
         </div>
         <div class="border border-slate-200 rounded-xl p-5">
           <h3 class="font-bold mb-2 text-slate-900">How do I keep a scan readable at 500KB or 200KB?</h3>
-          <p class="text-slate-600 leading-relaxed">Start with fewer pages and a sensible DPI. Compress toward 500KB first, then 200KB only if required. Open the result and read a full line of text. If letters smear, stop and split the document rather than forcing another aggressive pass that a reviewer cannot use.</p>
+          <p class="text-slate-600 leading-relaxed">Keep every required page. Choose a target that fits the stated limit, then inspect the smallest writing and marks. If the result is unclear, improve the source or split only when separate uploads are allowed.</p>
         </div>
       </div>
     </section>
@@ -180,10 +180,10 @@
 
     <div class="mt-16 text-center p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
       <h2 class="text-3xl font-bold mb-4">Ready to get under the limit?</h2>
-      <p class="text-lg text-slate-600 mb-8">getPDFpress is free, fast, and works on any device. No signup.</p>
+      <p class="text-lg text-slate-600 mb-8">getPDFpress is free to use through a compatible browser. No signup.</p>
       <a href="/compress-pdf-500kb" class="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-bold hover:bg-blue-700 transition">Compress my scan →</a>
     </div>
-  </article>
+  <h2>Test the source before retrying</h2><p>Keep one original scan. Change one scan setting at a time on a copy, compare the faintest marks and any required color, then compare exact bytes. Do not treat a lower DPI or grayscale setting as proof of readability. For text selection and PDF-level checks, see <a href="/learn/pdf-compression-vs-quality">the output-quality checklist</a>.</p></article>
 
   <footer class="bg-slate-900 text-white py-12 mt-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
